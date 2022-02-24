@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 
-	"gorm.io/gorm"
-
 	"ushas/database"
 )
 
@@ -40,25 +38,23 @@ func CreateAnswer(a *Answer) error {
 	return nil
 }
 
-func GetAnswerByID(id int) (a *Answer, err error) {
+func GetAnswerByID(id int) (*Answer, error) {
+	a := new(Answer)
 	db := database.GetDB()
-	err = db.Where("id = ?", id).First(a).Error
+	err := db.Where("id = ?", id).First(a).Error
 	if err != nil {
-		fmt.Println(err)
-		if err == gorm.ErrInvalidDB {
-			return a, RaiseNotFoundError(
-				err,
-				fmt.Sprintf("Answer for ID %d is not found", id),
-			)
-		}
-		return a, err
+		return a, RaiseNotFoundError(
+			err,
+			fmt.Sprintf("Answer for ID %d is not found", id),
+		)
 	}
 	return a, nil
 }
 
-func ListAnswer() (ans []*Answer, err error) {
+func ListAnswer() ([]Answer, error) {
+	ans := []Answer{}
 	db := database.GetDB()
-	err = db.Find(ans).Error
+	err := db.Find(&ans).Error
 	if err != nil {
 		return ans, err
 	}

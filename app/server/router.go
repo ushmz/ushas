@@ -54,10 +54,11 @@ func NewRouter() (*echo.Echo, error) {
 	task := controllers.NewTaskController()
 	user := controllers.NewUserController()
 
-	v.GET("/answer", answer.Get)
+	v.GET("/answer", answer.List)
+	v.GET("/answer/:id", answer.Get)
 	v.POST("/answer", answer.Create)
-	v.PUT("/answer", answer.Index)
-	v.DELETE("/answer", answer.Index)
+	v.PUT("/answer", answer.Update)
+	v.DELETE("/answer/:id", answer.Delete)
 
 	v.GET("/log", log.Index)
 	v.POST("/log", log.Index)

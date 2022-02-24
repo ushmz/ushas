@@ -24,14 +24,29 @@ type AnswerView struct {
 	Reason string `json:"reason"`
 }
 
-func NewAnswerView(a *models.Answer) *AnswerView {
+func NewAnswerView(answer *models.Answer) *AnswerView {
 	v := &AnswerView{
 		// ID:          a.Id,
-		UserID:      a.UserID,
-		TaskID:      a.TaskID,
-		ConditionID: a.ConditionID,
-		Answer:      a.Answer,
-		Reason:      a.Reason,
+		UserID:      answer.UserID,
+		TaskID:      answer.TaskID,
+		ConditionID: answer.ConditionID,
+		Answer:      answer.Answer,
+		Reason:      answer.Reason,
 	}
 	return v
+}
+
+func NewListAnswerView(answers []models.Answer) []*AnswerView {
+	vs := []*AnswerView{}
+	for _, a := range answers {
+		v := &AnswerView{
+			UserID:      a.UserID,
+			TaskID:      a.TaskID,
+			ConditionID: a.ConditionID,
+			Answer:      a.Answer,
+			Reason:      a.Reason,
+		}
+		vs = append(vs, v)
+	}
+	return vs
 }
