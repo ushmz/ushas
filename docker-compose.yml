@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  # app:
+  #   build:
+  #     context: ./app
+  #     dockerfile: ./Dockerfile
+  #   container_name: ushas-api
+  #   env_file: ./app/.env
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - db
+  db:
+    build:
+      context: ./database
+      dockerfile: ./mysql/Dockerfile
+    container_name: ushas-mysql
+    command: "mysqld"
+    env_file: ./database/mysql/.env
+    platform: linux/amd64
+    ports:
+      - 3366:3306
+    volumes:
+      - ./database/mysql/data:/var/lib/mysql
+      - ./database/mysql/log:/var/log/mysql

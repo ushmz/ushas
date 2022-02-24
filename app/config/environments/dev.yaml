@@ -1,0 +1,13 @@
+env: "dev"
+db:
+  provider: "mysql"
+  host: "0.0.0.0"
+  port: "3366"
+  user: "ushas"
+  password: "ushas"
+  database: "ushas"
+server:
+  version: "v1"
+  port: "8000"
+  cors:
+    - "http://localhost:3000"
