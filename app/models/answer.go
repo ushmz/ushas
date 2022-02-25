@@ -56,7 +56,7 @@ func ListAnswer() ([]Answer, error) {
 	db := database.GetDB()
 	err := db.Find(&ans).Error
 	if err != nil {
-		return ans, err
+		return ans, RaiseInternalServerError(err, "Failed to fetch all User resource")
 	}
 	return ans, nil
 }
@@ -65,7 +65,11 @@ func UpdateAnswer(a *Answer) error {
 	db := database.GetDB()
 	err := db.Save(a).Error
 	if err != nil {
-		return err
+		return RaiseInternalServerError(
+			err,
+			fmt.Sprintf("Failed to Update User resource of ID %d", a.ID),
+			a,
+		)
 	}
 	return nil
 }
@@ -74,7 +78,10 @@ func DeleteAnswer(id int) error {
 	db := database.GetDB()
 	err := db.Delete(&Answer{}, id).Error
 	if err != nil {
-		return err
+		return RaiseInternalServerError(
+			err,
+			fmt.Sprintf("Failed to delete User resource of ID %d", id),
+		)
 	}
 	return nil
 }
