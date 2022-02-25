@@ -11,7 +11,7 @@ func Init(env string) {
 	c.SetConfigFile("yaml")
 	c.SetConfigName(env)
 	c.AddConfigPath("config/environments/")
-	c.AddConfigPath("/run/secrets/")
+	c.AddConfigPath("/secrets/")
 	if err := c.ReadInConfig(); err != nil {
 		panic(err)
 	}
