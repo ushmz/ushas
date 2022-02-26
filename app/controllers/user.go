@@ -107,23 +107,39 @@ func (uc *UserController) GetUserByID(c echo.Context) error {
 
 func (uc *UserController) GetUserByUID(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
+
+	uid := c.Param("uid")
+
+	if len(uid) > 0 {
+		return c.JSON(http.StatusBadRequest, newResponse(
+			http.StatusBadRequest,
+			http.StatusText(http.StatusBadRequest),
+			"UID must be string and non-zero value",
+		))
+	}
+
+	u, err := models.GetUserByUID(uid)
+	if err != nil {
+		return newErrResponse(c, http.StatusNotFound, err, uid)
+	}
+
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		"OK",
+		u,
 	))
 }
 
 func (uc *UserController) List(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
 
 	us, err := models.ListUser()
 	if err != nil {
-		return new500Response(c, nil, err)
+		return newErrResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
 	uv := views.NewListUserView(us)
@@ -135,25 +151,65 @@ func (uc *UserController) List(c echo.Context) error {
 	))
 }
 
+// UpdateUserRequest : Struct for request of `user` update endpoint
+type UpdateUserRequest struct {
+	// ID : The ID of user.
+	ID int `json:"id" validate:"required"`
+
+	// Uid : User name/ID for label.
+	Uid string `json:"uid" validate:"required"`
+}
+
+// Update : Update user information. This connot update password.
 func (uc *UserController) Update(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
+
+	p := UpdateUserRequest{}
+	if err := c.Bind(&p); err != nil {
+		return newErrResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	if err := c.Validate(p); err != nil {
+		return newErrResponse(c, http.StatusBadRequest, err, p)
+	}
+
+	u := &models.User{ID: p.ID, UID: p.Uid}
+	if err := models.UpdateUser(u); err != nil {
+		return newErrResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		"OK",
+		u,
 	))
 }
 
 func (uc *UserController) Delete(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
+
+	idstr := c.Param("id")
+	id, err := strconv.Atoi(idstr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, newResponse(
+			http.StatusBadRequest,
+			http.StatusText(http.StatusBadRequest),
+			"User ID must be number",
+		))
+	}
+
+	if err := models.DeleteUser(id); err != nil {
+		return newErrResponse(c, http.StatusInternalServerError, err, id)
+	}
+
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		"OK",
+		id,
 	))
 }
 

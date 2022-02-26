@@ -11,6 +11,15 @@ type UserParam struct {
 	Uid string `json:"uid"`
 }
 
+// UserSimple : Struct for user information w/o secret.
+type UserSimple struct {
+	// ID : The ID of user.
+	ID int `gorm:"unique;not null;column:id" json:"id"`
+
+	// UID : External user_id (like crowdsourcing site).
+	UID string `gorm:"unique;not null;column:uid" json:"uid"`
+}
+
 // User : Struct for user information.
 type User struct {
 	// ID : The ID of user.
@@ -68,7 +77,7 @@ func ListUser() ([]User, error) {
 
 func UpdateUser(u *User) error {
 	db := database.GetDB()
-	err := db.Save(u).Error
+	err := db.Model(&User{}).Updates(u).Error
 	if err != nil {
 		return RaiseInternalServerError(
 			err,
