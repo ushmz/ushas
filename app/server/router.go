@@ -70,10 +70,11 @@ func NewRouter() (*echo.Echo, error) {
 	v.PUT("/task", task.Index)
 	v.DELETE("/task", task.Index)
 
-	v.GET("/user", user.Index)
-	v.POST("/user", user.Index)
-	v.PUT("/user", user.Index)
-	v.DELETE("/user", user.Index)
+	v.GET("/user", user.List)
+	v.GET("/user/:id", user.GetUserByID)
+	v.POST("/user", user.Create)
+	v.PUT("/user", user.Update)
+	v.DELETE("/user", user.Delete)
 
 	return e, nil
 }

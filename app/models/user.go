@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+	"ushas/database"
+)
 
 // UserParam : Struct for request of `/signup` endpoint
 type UserParam struct {
@@ -10,35 +13,80 @@ type UserParam struct {
 
 // User : Struct for user information.
 type User struct {
-	gorm.Model
-
 	// ID : The ID of user.
-	ID int `db:"id" json:"id"`
+	ID int `gorm:"unique;not null;column:id" json:"id"`
 
-	// Uid : External user_id (like crowdsourcing site).
-	Uid string `db:"uid" json:"uid"`
+	// UID : External user_id (like crowdsourcing site).
+	UID string `gorm:"unique;not null;column:uid" json:"uid"`
 
 	// Secret : Generated secret string.
-	Secret string `db:"generated_secret" json:"secret"`
+	Secret string `gorm:"unique;not null;column:generated_secret" json:"secret"`
 }
 
-// UserResponse : Struct for response body of `CreateUser` handler
-type UserResponse struct {
-	// Exist : Given uid is exist on DB ot not.
-	Exist bool `json:"exist"`
+func CreateUser(u *User) error {
+	db := database.GetDB()
+	err := db.Create(u).Error
+	if err != nil {
+		return RaiseInternalServerError(
+			err,
+			fmt.Sprintf("Failed to create new `User` resource"),
+		)
+	}
+	fmt.Println(u)
+	return nil
+}
 
-	// UserId : Unique ID used in DB.
-	UserId int `json:"user"`
+func GetUserByID(id int) (*User, error) {
+	u := new(User)
+	db := database.GetDB()
+	err := db.Where("id = ?", id).First(u).Error
+	if err != nil {
+		return u, RaiseNotFoundError(err, fmt.Sprintf("User for ID %d is not found", id))
+	}
+	return u, nil
+}
 
-	// Secret : Generated secret string.
-	Secret string `json:"secret"`
+func GetUserByUID(uid string) (*User, error) {
+	u := new(User)
+	db := database.GetDB()
+	err := db.Where("uid = ?", uid).First(u).Error
+	if err != nil {
+		return u, RaiseNotFoundError(err, fmt.Sprintf("User for ID %s is not found", uid))
+	}
+	return u, nil
+}
 
-	// TaskIds : Shows the IDs that user perform
-	TaskIds []int `json:"tasks"`
+func ListUser() ([]User, error) {
+	us := []User{}
+	db := database.GetDB()
+	err := db.Find(&us).Error
+	if err != nil {
+		return us, RaiseInternalServerError(err, "Failed to fetch all User resource")
+	}
+	return us, nil
+}
 
-	// ConditionId : Assigned condition ID
-	ConditionId int `json:"condition"`
+func UpdateUser(u *User) error {
+	db := database.GetDB()
+	err := db.Save(u).Error
+	if err != nil {
+		return RaiseInternalServerError(
+			err,
+			fmt.Sprintf("Failed to Update User resource of ID %d", u.ID),
+			u,
+		)
+	}
+	return nil
+}
 
-	// GroupId : The ID assigned to the pair of "task IDs" and "condition ID"
-	GroupId int `json:"group"`
+func DeleteUser(id int) error {
+	db := database.GetDB()
+	err := db.Delete(&User{}, id).Error
+	if err != nil {
+		return RaiseInternalServerError(
+			err,
+			fmt.Sprintf("Failed to delete User resource of ID %d", id),
+		)
+	}
+	return nil
 }

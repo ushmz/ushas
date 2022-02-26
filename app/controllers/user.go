@@ -1,7 +1,13 @@
 package controllers
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"strings"
+	"ushas/models"
+	"ushas/views"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,4 +24,180 @@ func (uc *UserController) Index(c echo.Context) error {
 		http.StatusText(http.StatusOK),
 		"OK",
 	))
+}
+
+// CreateUserRequest : Struct for request of `/signup` endpoint
+type CreateUserRequest struct {
+	// Uid : User name/ID for label.
+	Uid string `json:"uid" validate:"required"`
+}
+
+func (uc *UserController) Create(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+
+	p := CreateUserRequest{}
+	if err := c.Bind(&p); err != nil {
+		return c.JSON(http.StatusBadRequest, newResponse(
+			http.StatusBadRequest,
+			"Failed to parse request body",
+			p,
+		))
+	}
+
+	if err := c.Validate(p); err != nil {
+		if e, ok := err.(*models.APIError); ok {
+			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
+		}
+		return c.JSON(http.StatusBadRequest, newResponse(
+			http.StatusBadRequest,
+			err.Error(),
+			p,
+		))
+	}
+
+	u, err := models.GetUserByUID(p.Uid)
+	if err != nil {
+		fmt.Printf("\033[1;33m[INFO]\033[0m Username `%s` is not exist. Create new user.\n", p.Uid)
+		s := generateOneTimeSecret(32, 5, 5, 5, 5)
+		model := &models.User{UID: p.Uid, Secret: s}
+		if err := models.CreateUser(model); err != nil {
+			if e, ok := err.(*models.APIError); ok {
+				return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
+			}
+			return c.JSON(http.StatusInternalServerError, newResponse(
+				http.StatusInternalServerError,
+				http.StatusText(http.StatusInternalServerError),
+				p,
+			))
+		}
+		u = model
+	}
+
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		u,
+	))
+}
+
+func (uc *UserController) GetUserByID(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+
+	idstr := c.Param("id")
+	id, err := strconv.Atoi(idstr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, newResponse(
+			http.StatusBadRequest,
+			http.StatusText(http.StatusBadRequest),
+			"User ID must be number",
+		))
+	}
+
+	u, err := models.GetUserByID(id)
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		u,
+	))
+}
+
+func (uc *UserController) GetUserByUID(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		"OK",
+	))
+}
+
+func (uc *UserController) List(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+
+	us, err := models.ListUser()
+	if err != nil {
+		return new500Response(c, nil, err)
+	}
+
+	uv := views.NewListUserView(us)
+
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		uv,
+	))
+}
+
+func (uc *UserController) Update(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		"OK",
+	))
+}
+
+func (uc *UserController) Delete(c echo.Context) error {
+	if uc == nil {
+		new500Response(c, nil, nil)
+	}
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		"OK",
+	))
+}
+
+func generateOneTimeSecret(length, lower, upper, digits, symbols int) string {
+	var (
+		lowerCharSet = "abcdedfghijklmnopqrst"
+		upperCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		digitsSet    = "0123456789"
+		symbolsSet   = "!@#$%&*"
+		allCharSet   = lowerCharSet + upperCharSet + digitsSet + symbolsSet
+	)
+
+	var passwd strings.Builder
+
+	for i := 0; i < lower; i++ {
+		random := rand.Intn(len(lowerCharSet))
+		passwd.WriteString(string(lowerCharSet[random]))
+	}
+
+	for i := 0; i < upper; i++ {
+		random := rand.Intn(len(upperCharSet))
+		passwd.WriteString(string(upperCharSet[random]))
+	}
+
+	for i := 0; i < digits; i++ {
+		random := rand.Intn(len(digitsSet))
+		passwd.WriteString(string(digitsSet[random]))
+	}
+
+	for i := 0; i < symbols; i++ {
+		random := rand.Intn(len(symbolsSet))
+		passwd.WriteString(string(symbolsSet[random]))
+	}
+
+	remaining := length - lower - upper - digits - symbols
+	for i := 0; i < remaining; i++ {
+		random := rand.Intn(len(allCharSet))
+		passwd.WriteString(string(allCharSet[random]))
+	}
+
+	inRune := []rune(passwd.String())
+	rand.Shuffle(len(inRune), func(i, j int) {
+		inRune[i], inRune[j] = inRune[j], inRune[i]
+	})
+
+	return string(inRune)
 }
