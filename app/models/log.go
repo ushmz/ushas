@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // SerpViewingLogParam : Struct for task viewing time log request body
@@ -19,8 +17,6 @@ type SerpViewingLogParam struct {
 }
 
 type SerpViewingLog struct {
-	gorm.Model
-
 	// UserID : The ID of user (worker)
 	UserID int `db:"user_id" json:"user"`
 
@@ -56,7 +52,6 @@ type PageViewingLogParam struct {
 }
 
 type PageViewingLog struct {
-	gorm.Model
 	// UserID : The ID of user (worker)
 	UserID int `db:"user_id" json:"user"`
 
@@ -110,8 +105,6 @@ type SearchPageEventLogParam struct {
 }
 
 type SearchPageEventLog struct {
-	gorm.Model
-
 	// ID : The ID of each log record.
 	ID string `db:"id" json:"id"`
 
@@ -159,8 +152,6 @@ type SearchSessionParam struct {
 }
 
 type SearchSession struct {
-	gorm.Model
-
 	// UserID : Assigned ID of user (worker)
 	UserID int `db:"user_id" json:"user"`
 

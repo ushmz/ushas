@@ -1,11 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 // Task : Struct for Task information.
 type Task struct {
-	gorm.Model
-
 	// ID : The ID of task
 	ID int `db:"id" json:"id"`
 
@@ -24,8 +20,6 @@ type Task struct {
 
 // TaskInfo : Struct for response of which task is assigned.
 type TaskInfo struct {
-	gorm.Model
-
 	// GroupId : The ID assigned to the pair of "task IDs" and "condition ID"
 	GroupId int
 
