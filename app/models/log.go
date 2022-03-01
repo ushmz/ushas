@@ -2,168 +2,192 @@ package models
 
 import (
 	"time"
+	"ushas/database"
 )
-
-// SerpViewingLogParam : Struct for task viewing time log request body
-type SerpViewingLogParam struct {
-	// UserID : The ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
-
-	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
-
-	// ConditionId : User's condition ID that means group and task category.
-	ConditionId int `db:"condition_id" json:"condition"`
-}
 
 type SerpViewingLog struct {
 	// UserID : The ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+	UserID int `gorm:"not null;column:user_id"`
 
 	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
+	TaskID int `gorm:"not null;column:task_id"`
 
 	// ConditionId : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
+	ConditionID int `gorm:"not null;column:condition_id"`
 
 	// DwellTime : Time(sec.) that the user spend in SERP
-	DwellTime int `db:"time_on_page" json:"dwell_time"`
+	DwellTime int `gorm:"not null;column:time_on_page"`
 
 	// CreatedAt :
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	CreatedAt time.Time `gorm:"not null;column:created_at"`
 
 	// UpdatedAt :
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	UpdatedAt time.Time `gorm:"not null;column:updated_at"`
 }
 
-// PageViewingLogParam : Struct for each search result page viewing time log request body
-type PageViewingLogParam struct {
-	// UserID : The ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+func CreateSerpViewingLog(l *SerpViewingLog) error {
+	db := database.GetDB()
+	if err := db.Create(l).Error; err != nil {
+		return RaiseInternalServerError(
+			err,
+			"Failed to create new Log resource",
+		)
+	}
+	return nil
+}
 
-	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
-
-	// ConditionID : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
-
-	// PageID : Page ID that user view.
-	PageID int `db:"page_id" json:"page"`
+func ListSerpViewingLogs() ([]SerpViewingLog, error) {
+	logs := []SerpViewingLog{}
+	db := database.GetDB()
+	if err := db.Find(logs).Error; err != nil {
+		return logs, RaiseInternalServerError(
+			err,
+			"Failed to fetch all Logs",
+		)
+	}
+	return logs, nil
 }
 
 type PageViewingLog struct {
 	// UserID : The ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+	UserID int `gorm:"not null;column:user_id"`
 
 	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
+	TaskID int `gorm:"not null;column:task_id"`
 
 	// PageID : Page ID that user view.
-	PageID int `db:"page_id" json:"page"`
+	PageID int `gorm:"not null;column:page_id"`
 
 	// ConditionID : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
+	ConditionID int `gorm:"not null;column:condition_id"`
 
 	// DwellTime : Time(sec.) that the user spend in SERP
-	DwellTime int `db:"time_on_page" json:"dwell_time"`
+	DwellTime int `gorm:"not null;column:time_on_page"`
 
 	// CreatedAt :
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	CreatedAt time.Time `gorm:"not null;column:created_at"`
 
 	// UpdatedAt :
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	UpdatedAt time.Time `gorm:"not null;column:updated_at"`
 }
 
-// SearchPageEventLogParam : Struct for page click log request body.
-type SearchPageEventLogParam struct {
-	// ID : The ID of each log record.
-	ID string `db:"id" json:"id"`
-
-	// Uid : The ID of user (worker)
-	User int `db:"user_id" json:"user"`
-
-	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
-
-	// ConditionID : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
-
-	// Time : User's page viewing time.
-	Time int `db:"time_on_page" json:"time"`
-
-	// Page : The ID of page that user clicked.
-	Page int `db:"serp_page" json:"page"`
-
-	// Rank : Search result rank that user clicked.
-	Rank int `db:"serp_rank" json:"rank"`
-
-	// IsVisible : Risk is visible or not.
-	IsVisible bool `db:"is_visible" json:"visible"`
-
-	// Event : It is expected to be "click", "hover" or "paginate"
-	Event string `db:"event" json:"event"`
+func CreatePageViewingLog(l *PageViewingLog) error {
+	db := database.GetDB()
+	if err := db.Create(l).Error; err != nil {
+		return RaiseInternalServerError(
+			err,
+			"Failed to create new Log resource",
+		)
+	}
+	return nil
 }
 
-type SearchPageEventLog struct {
+func ListPageViewingLog() ([]PageViewingLog, error) {
+	logs := []PageViewingLog{}
+	db := database.GetDB()
+	if err := db.Find(logs).Error; err != nil {
+		return logs, RaiseInternalServerError(
+			err,
+			"Failed to fetch all Logs",
+		)
+	}
+	return logs, nil
+}
+
+type SerpEventLog struct {
 	// ID : The ID of each log record.
-	ID string `db:"id" json:"id"`
+	ID string `gorm:"not null;column:id"`
 
 	// UserId : The ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+	UserID int `gorm:"not null;column:user_id"`
 
 	// TaskId : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
+	TaskID int `gorm:"not null;column:task_id"`
 
 	// ConditionId : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
+	ConditionID int `gorm:"not null;column:condition_id"`
 
 	// Time : User's page viewing time.
-	Time int `db:"time_on_page" json:"time"`
+	Time int `gorm:"not null;column:time_on_page"`
 
 	// Page : The ID of page that user clicked.
-	Page int `db:"serp_page" json:"page"`
+	Page int `gorm:"not null;column:serp_page"`
 
 	// Rank : Search result rank that user clicked.
-	Rank int `db:"serp_rank" json:"rank"`
+	Rank int `gorm:"not null;column:serp_rank"`
 
 	// IsVisible : Risk is visible or not.
-	IsVisible bool `db:"is_visible" json:"visible"`
+	IsVisible bool `gorm:"not null;column:is_visible"`
 
 	// Event : It is expected to be "click", "hover" or "paginate"
-	Event string `db:"event" json:"event"`
+	Event string `gorm:"not null;column:event"`
 
 	// CreatedAt :
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	CreatedAt time.Time `gorm:"not null;not null;column:created_at"`
 
 	// UpdatedAt :
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	UpdatedAt time.Time `gorm:"not null;column:updated_at"`
 }
 
-// SearchSessionParam : Struct fot search session request body.
-type SearchSessionParam struct {
-	// UserID : Assigned ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+func CreateSerpEventLog(l *PageViewingLog) error {
+	db := database.GetDB()
+	if err := db.Create(l).Error; err != nil {
+		return RaiseInternalServerError(
+			err,
+			"Failed to create new Log resource",
+		)
+	}
+	return nil
+}
 
-	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
-
-	// ConditionID : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
+func ListSerpEventLog() ([]SerpEventLog, error) {
+	logs := []SerpEventLog{}
+	db := database.GetDB()
+	if err := db.Find(logs).Error; err != nil {
+		return logs, RaiseInternalServerError(
+			err,
+			"Failed to fetch all Logs",
+		)
+	}
+	return logs, nil
 }
 
 type SearchSession struct {
 	// UserID : Assigned ID of user (worker)
-	UserID int `db:"user_id" json:"user"`
+	UserID int `gorm:"not null;column:user_id"`
 
 	// TaskID : The ID of task that user working.
-	TaskID int `db:"task_id" json:"task"`
+	TaskID int `gorm:"not null;column:task_id"`
 
 	// ConditionID : User's condition ID that means group and task category.
-	ConditionID int `db:"condition_id" json:"condition"`
+	ConditionID int `gorm:"not null;column:condition_id"`
 
 	// StartedAt :
-	StartedAt time.Time `db:"started_at" json:"started_at"`
+	StartedAt time.Time `gorm:"not null;column:started_at"`
 
 	// EndedAt :
-	EndedAt time.Time `db:"ended_at" json:"ended_at"`
+	EndedAt time.Time `gorm:"not null;column:ended_at"`
+}
+
+func CreateSearchSession(l SearchSession) error {
+	db := database.GetDB()
+	if err := db.Create(l).Error; err != nil {
+		return RaiseInternalServerError(
+			err,
+			"Failed to create new Log resource",
+		)
+	}
+	return nil
+}
+
+func ListSearchSession() ([]SearchSession, error) {
+	logs := []SearchSession{}
+	db := database.GetDB()
+	if err := db.Find(logs).Error; err != nil {
+		return logs, RaiseInternalServerError(
+			err,
+			"Failed to fetch all Logs",
+		)
+	}
+	return logs, nil
 }

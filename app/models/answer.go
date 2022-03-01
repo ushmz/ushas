@@ -28,12 +28,8 @@ type Answer struct {
 
 func CreateAnswer(a *Answer) error {
 	db := database.GetDB()
-	err := db.Create(a).Error
-	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to create new `Answer` resource"),
-		)
+	if err := db.Create(a).Error; err != nil {
+		return RaiseInternalServerError(err, "Failed to create new `Answer` resource")
 	}
 	return nil
 }
@@ -43,15 +39,12 @@ func GetAnswerByID(id int) (*Answer, error) {
 	db := database.GetDB()
 	err := db.Where("id = ?", id).First(a).Error
 	if err != nil {
-		return a, RaiseNotFoundError(
-			err,
-			fmt.Sprintf("Answer for ID %d is not found", id),
-		)
+		return a, RaiseNotFoundError( err, fmt.Sprintf("Answer for ID %d is not found", id))
 	}
 	return a, nil
 }
 
-func ListAnswer() ([]Answer, error) {
+func ListAnswers() ([]Answer, error) {
 	ans := []Answer{}
 	db := database.GetDB()
 	err := db.Find(&ans).Error

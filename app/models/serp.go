@@ -45,6 +45,14 @@ type SearchPageWithLinkedPageRow struct {
 	Category string `db:"category" json:"category"`
 }
 
+// CategoryCount : Distribution information for each categories.
+type CategoryCount struct {
+	// Category : Category name.
+	Category string `json:"category"`
+	// Count : Total number of pages.
+	Count int `json:"count"`
+}
+
 // SearchPageWithRatio : The list of this type struct will be returned as a response of `serp` endpoint.
 type SearchPageWithRatio struct {
 	SearchPage `gorm:"embedded"`
