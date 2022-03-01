@@ -34,7 +34,7 @@ type CreateUserRequest struct {
 
 func (uc *UserController) Create(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return new500Response(c, nil, nil)
 	}
 
 	p := CreateUserRequest{}
@@ -46,7 +46,7 @@ func (uc *UserController) Create(c echo.Context) error {
 		))
 	}
 
-	if err := c.Validate(p); err != nil {
+	if err := c.Validate(&p); err != nil {
 		if e, ok := err.(*models.APIError); ok {
 			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
 		}
@@ -75,16 +75,16 @@ func (uc *UserController) Create(c echo.Context) error {
 		u = model
 	}
 
-	return c.JSON(http.StatusOK, newResponse(
-		http.StatusOK,
-		http.StatusText(http.StatusOK),
+	return c.JSON(http.StatusCreated, newResponse(
+		http.StatusCreated,
+		http.StatusText(http.StatusCreated),
 		u,
 	))
 }
 
 func (uc *UserController) GetUserByID(c echo.Context) error {
 	if uc == nil {
-		new500Response(c, nil, nil)
+		return new500Response(c, nil, nil)
 	}
 
 	idstr := c.Param("id")
@@ -98,6 +98,10 @@ func (uc *UserController) GetUserByID(c echo.Context) error {
 	}
 
 	u, err := models.GetUserByID(id)
+	if err != nil {
+		return newErrResponse(c, http.StatusInternalServerError, err, id)
+	}
+
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
@@ -137,7 +141,7 @@ func (uc *UserController) List(c echo.Context) error {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
 
-	us, err := models.ListUser()
+	us, err := models.ListUsers()
 	if err != nil {
 		return newErrResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -195,11 +199,7 @@ func (uc *UserController) Delete(c echo.Context) error {
 	idstr := c.Param("id")
 	id, err := strconv.Atoi(idstr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"User ID must be number",
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, "User ID must be number")
 	}
 
 	if err := models.DeleteUser(id); err != nil {

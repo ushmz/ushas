@@ -24,7 +24,7 @@ func (v *Validator) Validate(i interface{}) error {
 			results = append(results, msg)
 		}
 
-		return models.RaiseBadRequestError(err, "", results)
+		return models.RaiseBadRequestError(err, "Requested body is invalid", results)
 
 	}
 	return nil

@@ -79,7 +79,7 @@ func (ac *AnswerController) List(c echo.Context) error {
 		))
 	}
 
-	ans, err := models.ListAnswer()
+	ans, err := models.ListAnswers()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, newResponse(
 			http.StatusInternalServerError,
@@ -124,21 +124,10 @@ func (ac *AnswerController) Create(c echo.Context) error {
 
 	p := CreateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			"Failed to parse request body",
-			p,
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, "Failed to bind request body")
 	}
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
-		}
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			err.Error(),
-			p,
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, p)
 	}
 
 	model := &models.Answer{
@@ -150,14 +139,7 @@ func (ac *AnswerController) Create(c echo.Context) error {
 	}
 
 	if err := models.CreateAnswer(model); err != nil {
-		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
-		}
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			p,
-		))
+		return newErrResponse(c, http.StatusInternalServerError, err, p)
 	}
 
 	return c.JSON(http.StatusCreated, newResponse(

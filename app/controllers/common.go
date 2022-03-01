@@ -27,3 +27,10 @@ func new500Response(context echo.Context, request interface{}, err error) error 
 		request,
 	))
 }
+
+func newErrResponse(context echo.Context, status int, err error, request interface{}) error {
+	if e, ok := err.(*models.APIError); ok {
+		return context.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
+	}
+	return context.JSON(status, newResponse(status, http.StatusText(status), request))
+}

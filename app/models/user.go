@@ -36,12 +36,8 @@ func CreateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Create(u).Error
 	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to create new `User` resource"),
-		)
+		return RaiseInternalServerError(err, "Failed to create new `User` resource")
 	}
-	fmt.Println(u)
 	return nil
 }
 
@@ -65,7 +61,7 @@ func GetUserByUID(uid string) (*User, error) {
 	return u, nil
 }
 
-func ListUser() ([]User, error) {
+func ListUsers() ([]User, error) {
 	us := []User{}
 	db := database.GetDB()
 	err := db.Find(&us).Error
