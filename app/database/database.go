@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"time"
 	"ushas/config"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -35,16 +37,17 @@ func Init(isReset bool, models ...interface{}) {
 	}
 
 	// Wait until connect to DB
-	// for {
-	// 	err = d.Ping()
-	// 	if err != nil {
-	// 		log.Println("DB is not ready. Retry connecting...")
-	// 		time.Sleep(1 * time.Second)
-	// 		continue
-	// 	}
-	// 	log.Println("Success to connect DB")
-	// 	break
-	// }
+	for {
+		if db, err := d.DB(); err != nil {
+			if err := db.Ping(); err != nil {
+				log.Println("DB is not ready. Retry connecting...")
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			log.Println("Success to connect DB")
+			break
+		}
+	}
 
 	// Migration
 	if c.GetString("env") == "prod" {
