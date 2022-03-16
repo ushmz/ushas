@@ -9,19 +9,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// AnswerController : Struct for controll `Answer` resource.
 type AnswerController struct{}
 
+// NewAnswerController : Return pointer to `AnswerController`.
 func NewAnswerController() *AnswerController {
 	return new(AnswerController)
 }
 
+// Index : index
 func (ac *AnswerController) Index(c echo.Context) error {
 	if ac == nil {
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Controller is nil",
-		))
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
 
 	return c.JSON(http.StatusOK, newResponse(
@@ -31,35 +30,20 @@ func (ac *AnswerController) Index(c echo.Context) error {
 	))
 }
 
+// Get : Get single `Answer` resource.
 func (ac *AnswerController) Get(c echo.Context) error {
 	if ac == nil {
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Controller is nil",
-		))
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
 
 	idstr := c.Param("id")
 	id, err := strconv.ParseInt(idstr, 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"Answer ID must be number",
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, "Answer ID must be number")
 	}
 	ans, err := models.GetAnswerByID(int(id))
 	if err != nil {
-		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, ""))
-		}
-
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Failed to get answer",
-		))
+		return newErrResponse(c, http.StatusInternalServerError, err, fmt.Sprintf("Failed to get Answer of ID %d", id))
 	}
 
 	answer := views.NewAnswerView(ans)
@@ -126,7 +110,7 @@ func (ac *AnswerController) Create(c echo.Context) error {
 	if err := c.Bind(&p); err != nil {
 		return newErrResponse(c, http.StatusBadRequest, err, "Failed to bind request body")
 	}
-	if err := c.Validate(p); err != nil {
+	if err := c.Validate(&p); err != nil {
 		return newErrResponse(c, http.StatusBadRequest, err, p)
 	}
 
@@ -177,11 +161,11 @@ func (ac *AnswerController) Update(c echo.Context) error {
 
 	p := UpdateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"Failed to parse request body",
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, "Failed to bind requested body")
+	}
+
+	if err := c.Validate(&p); err != nil {
+		return newErrResponse(c, http.StatusBadRequest, err, p)
 	}
 
 	model := &models.Answer{
@@ -192,14 +176,7 @@ func (ac *AnswerController) Update(c echo.Context) error {
 		Reason:      p.Reason,
 	}
 	if err := models.UpdateAnswer(model); err != nil {
-		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
-		}
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Failed to update",
-		))
+		return newErrResponse(c, http.StatusInternalServerError, err, p)
 	}
 
 	return c.JSON(http.StatusOK, newResponse(
@@ -210,34 +187,20 @@ func (ac *AnswerController) Update(c echo.Context) error {
 
 }
 
+// Delete : Delete a single `Answer` resource.
 func (ac *AnswerController) Delete(c echo.Context) error {
 	if ac == nil {
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Controller is nil",
-		))
+		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
 	}
 
 	idstr := c.Param("id")
-	id, err := strconv.ParseInt(idstr, 10, 64)
+	id, err := strconv.Atoi(idstr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"Answer ID must be number",
-		))
+		return newErrResponse(c, http.StatusBadRequest, err, "Answer ID must be number")
 	}
-	if err := models.DeleteAnswer(int(id)); err != nil {
-		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, ""))
-		}
 
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Failed to delete answer",
-		))
+	if err := models.DeleteAnswer(id); err != nil {
+		return newErrResponse(c, http.StatusInternalServerError, err, id)
 	}
 
 	return c.JSON(http.StatusOK, newResponse(
