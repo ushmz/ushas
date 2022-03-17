@@ -1,0 +1,15 @@
+root = "."
+tmp_dir = ".temp"
+
+[build]
+  exclude_unchanged = true
+
+[color]
+  app = "red"
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[misc]
+  clean_on_exit = true
