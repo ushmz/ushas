@@ -6,6 +6,7 @@ import (
 
 var c *viper.Viper
 
+// Init : Reads configuration files.
 func Init(env string) {
 	c = viper.New()
 	c.SetConfigFile("yaml")
@@ -17,6 +18,7 @@ func Init(env string) {
 	}
 }
 
+// GetConfig : Returns configuration values.
 func GetConfig() *viper.Viper {
 	return c
 }

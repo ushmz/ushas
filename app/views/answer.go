@@ -4,6 +4,7 @@ import (
 	"ushas/models"
 )
 
+// AnswerView : Response data of "/answer" endpoint.
 type AnswerView struct {
 	// ID : The ID of user.
 	// ID int `json:"id"`
@@ -24,6 +25,7 @@ type AnswerView struct {
 	Reason string `json:"reason"`
 }
 
+// NewAnswerView : Returns single answer response data.
 func NewAnswerView(answer *models.Answer) *AnswerView {
 	v := &AnswerView{
 		// ID:          a.Id,
@@ -36,6 +38,7 @@ func NewAnswerView(answer *models.Answer) *AnswerView {
 	return v
 }
 
+// NewListAnswerView : Return listed answer response data.
 func NewListAnswerView(answers []models.Answer) []*AnswerView {
 	vs := []*AnswerView{}
 	for _, a := range answers {

@@ -2,6 +2,7 @@ package views
 
 import "ushas/models"
 
+// UserView : Response data of "user" endpoint.
 type UserView struct {
 	// ID : The ID of user.
 	ID int `json:"id"`
@@ -15,8 +16,8 @@ type UserResponseView struct {
 	// Exist : Given uid is exist on DB ot not.
 	Exist bool `json:"exist"`
 
-	// UserId : Unique ID used in DB.
-	UserId int `json:"user"`
+	// UserID : Unique ID used in DB.
+	UserID int `json:"user"`
 
 	// Secret : Generated secret string.
 	Secret string `json:"secret"`
@@ -24,18 +25,20 @@ type UserResponseView struct {
 	// TaskIds : Shows the IDs that user perform
 	TaskIds []int `json:"tasks"`
 
-	// ConditionId : Assigned condition ID
-	ConditionId int `json:"condition"`
+	// ConditionID : Assigned condition ID
+	ConditionID int `json:"condition"`
 
-	// GroupId : The ID assigned to the pair of "task IDs" and "condition ID"
-	GroupId int `json:"group"`
+	// GroupID : The ID assigned to the pair of "task IDs" and "condition ID"
+	GroupID int `json:"group"`
 }
 
+// NewUserView : Returns single user response data.
 func NewUserView(u *models.User) *UserView {
 	v := &UserView{ID: u.ID, UID: u.UID}
 	return v
 }
 
+// NewListUserView : Returns listed user response.
 func NewListUserView(us []models.User) []UserView {
 	vs := []UserView{}
 	for _, u := range us {
@@ -45,6 +48,7 @@ func NewListUserView(us []models.User) []UserView {
 	return vs
 }
 
+// NewCreateUserView : Returns data when new user is created.
 func NewCreateUserView(u *models.User) *UserResponseView {
 	return nil
 }

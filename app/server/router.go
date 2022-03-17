@@ -12,10 +12,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+// Validator : Struct for validation.
 type Validator struct {
 	validator *validator.Validate
 }
 
+// Validate : Validate request body.
 func (v *Validator) Validate(i interface{}) error {
 	if err := v.validator.Struct(i); err != nil {
 		results := []string{}
@@ -23,13 +25,12 @@ func (v *Validator) Validate(i interface{}) error {
 			msg := fmt.Sprintf("Field `%v` failed on '%s' restriction", e.Field(), e.Tag())
 			results = append(results, msg)
 		}
-
 		return models.RaiseBadRequestError(err, "Requested body is invalid", results)
-
 	}
 	return nil
 }
 
+// NewRouter : Return pointer to router struct.
 func NewRouter() (*echo.Echo, error) {
 	c := config.GetConfig()
 	e := echo.New()
@@ -57,23 +58,28 @@ func NewRouter() (*echo.Echo, error) {
 	v.GET("/answer", answer.List)
 	v.GET("/answer/:id", answer.Get)
 	v.POST("/answer", answer.Create)
-	v.PUT("/answer", answer.Update)
+	v.PUT("/answer/:id", answer.Update)
 	v.DELETE("/answer/:id", answer.Delete)
 
+	v.GET("/log/dwell", log.Index)
+	v.GET("/log/view", log.Index)
 	v.GET("/log", log.Index)
+	// The usage that getting each log doesn't expected.
+	// v.GET("/log/:id", log.Index)
 	v.POST("/log", log.Index)
-	v.PUT("/log", log.Index)
-	v.DELETE("/log", log.Index)
+	v.PUT("/log/:id", log.Index)
+	v.DELETE("/log/:id", log.Index)
 
 	v.GET("/task", task.Index)
+	v.GET("/task/:id", task.Index)
 	v.POST("/task", task.Index)
-	v.PUT("/task", task.Index)
+	v.PUT("/task/:id", task.Index)
 	v.DELETE("/task", task.Index)
 
 	v.GET("/user", user.List)
 	v.GET("/user/:id", user.GetUserByID)
 	v.POST("/user", user.Create)
-	v.PUT("/user", user.Update)
+	v.PUT("/user/:id", user.Update)
 	v.DELETE("/user", user.Delete)
 
 	return e, nil

@@ -19,22 +19,23 @@ type Task struct {
 	// Description : Description text of task.
 	Description string `gorm:"not null;column:description" json:"description"`
 
-	// SearchUrl : Url used in this task.
-	SearchUrl string `gorm:"not null;column:search_url" json:"searchUrl"`
+	// SearchURL : Url used in this task.
+	SearchURL string `gorm:"not null;column:search_url" json:"searchUrl"`
 }
 
 // TaskInfo : Struct for response of which task is assigned.
 type TaskInfo struct {
-	// GroupId : The ID assigned to the pair of "task IDs" and "condition ID"
-	GroupId int
+	// GroupID : The ID assigned to the pair of "task IDs" and "condition ID"
+	GroupID int
 
-	// ConditionId : Assigned condition ID
-	ConditionId int
+	// ConditionID : Assigned condition ID
+	ConditionID int
 
 	// TaskIds : Shows the IDs that user perform
 	TaskIds []int
 }
 
+// CreateTask : Create new record into table.
 func CreateTask(t *Task) error {
 	db := database.GetDB()
 	if err := db.Create(t).Error; err != nil {
@@ -46,6 +47,7 @@ func CreateTask(t *Task) error {
 	return nil
 }
 
+// GetTaskByID : Get single record from table by ID.
 func GetTaskByID(id int) (*Task, error) {
 	t := new(Task)
 	db := database.GetDB()
@@ -58,6 +60,7 @@ func GetTaskByID(id int) (*Task, error) {
 	return t, nil
 }
 
+// ListTasks : Get all records from table.
 func ListTasks() ([]Task, error) {
 	tasks := []Task{}
 	db := database.GetDB()
@@ -70,6 +73,7 @@ func ListTasks() ([]Task, error) {
 	return tasks, nil
 }
 
+// UpdateTask : Update a record with given ID in table.
 func UpdateTask(t *Task) error {
 	db := database.GetDB()
 	if err := db.Save(t).Error; err != nil {
@@ -82,6 +86,7 @@ func UpdateTask(t *Task) error {
 	return nil
 }
 
+// DeleteTask : Delete a record with given ID from table.
 func DeleteTask(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Task{}, id).Error; err != nil {

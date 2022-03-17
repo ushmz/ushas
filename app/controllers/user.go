@@ -12,12 +12,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// UserController : Struct for controll `User` resource.
 type UserController struct{}
 
+// NewUserController : Return pointer to `UserController`.
 func NewUserController() *UserController {
 	return new(UserController)
 }
 
+// Index : index
 func (uc *UserController) Index(c echo.Context) error {
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
@@ -28,10 +31,11 @@ func (uc *UserController) Index(c echo.Context) error {
 
 // CreateUserRequest : Struct for request of `/signup` endpoint
 type CreateUserRequest struct {
-	// Uid : User name/ID for label.
-	Uid string `json:"uid" validate:"required"`
+	// UID : User name/ID for label.
+	UID string `json:"uid" validate:"required"`
 }
 
+// Create : Create new user.
 func (uc *UserController) Create(c echo.Context) error {
 	if uc == nil {
 		return new500Response(c, nil, nil)
@@ -57,11 +61,11 @@ func (uc *UserController) Create(c echo.Context) error {
 		))
 	}
 
-	u, err := models.GetUserByUID(p.Uid)
+	u, err := models.GetUserByUID(p.UID)
 	if err != nil {
-		fmt.Printf("\033[1;33m[INFO]\033[0m Username `%s` is not exist. Create new user.\n", p.Uid)
+		fmt.Printf("\033[1;33m[INFO]\033[0m Username `%s` is not exist. Create new user.\n", p.UID)
 		s := generateOneTimeSecret(32, 5, 5, 5, 5)
-		model := &models.User{UID: p.Uid, Secret: s}
+		model := &models.User{UID: p.UID, Secret: s}
 		if err := models.CreateUser(model); err != nil {
 			if e, ok := err.(*models.APIError); ok {
 				return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
@@ -82,6 +86,7 @@ func (uc *UserController) Create(c echo.Context) error {
 	))
 }
 
+// GetUserByID : Get an user by ID.
 func (uc *UserController) GetUserByID(c echo.Context) error {
 	if uc == nil {
 		return new500Response(c, nil, nil)
@@ -109,6 +114,7 @@ func (uc *UserController) GetUserByID(c echo.Context) error {
 	))
 }
 
+// GetUserByUID : Get an user by UID.
 func (uc *UserController) GetUserByUID(c echo.Context) error {
 	if uc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -136,6 +142,7 @@ func (uc *UserController) GetUserByUID(c echo.Context) error {
 	))
 }
 
+// List : List all users.
 func (uc *UserController) List(c echo.Context) error {
 	if uc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -160,8 +167,8 @@ type UpdateUserRequest struct {
 	// ID : The ID of user.
 	ID int `json:"id" validate:"required"`
 
-	// Uid : User name/ID for label.
-	Uid string `json:"uid" validate:"required"`
+	// UID : User name/ID for label.
+	UID string `json:"uid" validate:"required"`
 }
 
 // Update : Update user information. This connot update password.
@@ -179,7 +186,7 @@ func (uc *UserController) Update(c echo.Context) error {
 		return newErrResponse(c, http.StatusBadRequest, err, p)
 	}
 
-	u := &models.User{ID: p.ID, UID: p.Uid}
+	u := &models.User{ID: p.ID, UID: p.UID}
 	if err := models.UpdateUser(u); err != nil {
 		return newErrResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -191,6 +198,7 @@ func (uc *UserController) Update(c echo.Context) error {
 	))
 }
 
+// Delete : Delete an user.
 func (uc *UserController) Delete(c echo.Context) error {
 	if uc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -213,6 +221,7 @@ func (uc *UserController) Delete(c echo.Context) error {
 	))
 }
 
+// generateOneTimeSecret : Generate password for new user.
 func generateOneTimeSecret(length, lower, upper, digits, symbols int) string {
 	var (
 		lowerCharSet = "abcdedfghijklmnopqrst"

@@ -2,14 +2,14 @@ package models
 
 // SearchPage : Each of search result pages.
 type SearchPage struct {
-	// PageId : ID of search page.
-	PageId int `db:"id" json:"id"`
+	// PageID : ID of search page.
+	PageID int `db:"id" json:"id"`
 
 	// Title : The title of each search result page.
 	Title string `db:"title" json:"title"`
 
-	// Url : Url of each search result page.
-	Url string `db:"url" json:"url"`
+	// URL : URL of each search result page.
+	URL string `db:"url" json:"url"`
 
 	// Snippet : Snippet of each search result page.
 	Snippet string `db:"snippet" json:"snippet"`
@@ -26,17 +26,17 @@ type SearchPageWithIcon struct {
 
 // SearchPageWithLinkedPageRow : `SearchPage` with `LinkedPage` query result row struct
 type SearchPageWithLinkedPageRow struct {
-	// PageId : ID of search result page.
-	PageId int `db:"page_id" json:"page"`
+	// PageID : ID of search result page.
+	PageID int `db:"page_id" json:"page"`
 
-	// Id : ID of linked page.
-	Id int `db:"id" json:"id"`
+	// ID : ID of linked page.
+	ID int `db:"id" json:"id"`
 
 	// Title : The title of linked page.
 	Title string `db:"title" json:"title"`
 
-	// Url : Url of the linked page.
-	Url string `db:"url" json:"url"`
+	// URL : URL of the linked page.
+	URL string `db:"url" json:"url"`
 
 	// Icon : Favicon url of the page.
 	Icon string `db:"icon_path" json:"icon"`
@@ -66,8 +66,8 @@ type SearchPageWithRatio struct {
 
 // SearchPageWithLinkedPageRatioRow : `SearchPage` with `LinkedPage` query result row struct
 type SearchPageWithLinkedPageRatioRow struct {
-	// PageId : ID of search page.
-	PageId int `db:"page_id" json:"page"`
+	// PageID : ID of search page.
+	PageID int `db:"page_id" json:"page"`
 
 	// Category : Linked page category name.
 	Category string `db:"category"`

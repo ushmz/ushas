@@ -8,12 +8,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// TaskController : Struct for controll `Task` resource.
 type TaskController struct{}
 
+// NewTaskController : Return pointer to `LogController`.
 func NewTaskController() *TaskController {
 	return new(TaskController)
 }
 
+// Index : index
 func (tc *TaskController) Index(c echo.Context) error {
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
@@ -22,6 +25,7 @@ func (tc *TaskController) Index(c echo.Context) error {
 	))
 }
 
+// CreateTaskRequest : Struct for task create request body.
 type CreateTaskRequest struct {
 	// Query : Search query for this task.
 	Query string `json:"query"`
@@ -32,10 +36,11 @@ type CreateTaskRequest struct {
 	// Description : Description text of task.
 	Description string `json:"description"`
 
-	// SearchUrl : Url used in this task.
-	SearchUrl string `json:"searchUrl"`
+	// SearchURL : Url used in this task.
+	SearchURL string `json:"searchUrl"`
 }
 
+// Create : Create new task.
 func (tc *TaskController) Create(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -54,7 +59,7 @@ func (tc *TaskController) Create(c echo.Context) error {
 		Query:       p.Query,
 		Title:       p.Title,
 		Description: p.Description,
-		SearchUrl:   p.SearchUrl,
+		SearchURL:   p.SearchURL,
 	}
 	if err := models.CreateTask(t); err != nil {
 		return newErrResponse(c, http.StatusInternalServerError, err, nil)
@@ -67,6 +72,7 @@ func (tc *TaskController) Create(c echo.Context) error {
 	))
 }
 
+// AllocateTask : Allocate tasks for new user.
 func (tc *TaskController) AllocateTask(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -79,6 +85,7 @@ func (tc *TaskController) AllocateTask(c echo.Context) error {
 	))
 }
 
+// GetTaskByID : Get a task by ID.
 func (tc *TaskController) GetTaskByID(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -102,6 +109,7 @@ func (tc *TaskController) GetTaskByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, newResponse(http.StatusOK, http.StatusText(http.StatusOK), t))
 }
 
+// ListTask : Lists all tasks.
 func (tc *TaskController) ListTask(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -119,6 +127,7 @@ func (tc *TaskController) ListTask(c echo.Context) error {
 	))
 }
 
+// UpdateTaskRequest : Request parameters for update task.
 type UpdateTaskRequest struct {
 	// ID : The ID of task
 	ID int `db:"id" json:"id"`
@@ -132,10 +141,11 @@ type UpdateTaskRequest struct {
 	// Description : Description text of task.
 	Description string `db:"description" json:"description"`
 
-	// SearchUrl : Url used in this task.
-	SearchUrl string `db:"search_url" json:"searchUrl"`
+	// SearchURL : Url used in this task.
+	SearchURL string `db:"search_url" json:"searchUrl"`
 }
 
+// UpdateTask : Update task.
 func (tc *TaskController) UpdateTask(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -155,7 +165,7 @@ func (tc *TaskController) UpdateTask(c echo.Context) error {
 		Query:       p.Query,
 		Title:       p.Title,
 		Description: p.Description,
-		SearchUrl:   p.SearchUrl,
+		SearchURL:   p.SearchURL,
 	}
 	if err := models.UpdateTask(t); err != nil {
 		return newErrResponse(c, http.StatusInternalServerError, err, t)
@@ -168,6 +178,7 @@ func (tc *TaskController) UpdateTask(c echo.Context) error {
 	))
 }
 
+// DeleteTask : Delete a single task.
 func (tc *TaskController) DeleteTask(c echo.Context) error {
 	if tc == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)

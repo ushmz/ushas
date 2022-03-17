@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"ushas/models"
@@ -30,7 +31,7 @@ func (ac *AnswerController) Index(c echo.Context) error {
 	))
 }
 
-// Get : Get single `Answer` resource.
+// Get : Get single answer by ID.
 func (ac *AnswerController) Get(c echo.Context) error {
 	if ac == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
@@ -54,6 +55,7 @@ func (ac *AnswerController) Get(c echo.Context) error {
 	))
 }
 
+// List : Lists all answers.
 func (ac *AnswerController) List(c echo.Context) error {
 	if ac == nil {
 		return c.JSON(http.StatusInternalServerError, newResponse(
@@ -80,6 +82,7 @@ func (ac *AnswerController) List(c echo.Context) error {
 	))
 }
 
+// CreateAnswerRequest : Request parameters for createing new `Answer` resource.
 type CreateAnswerRequest struct {
 	// UserID : Means external ID.
 	UserID int `json:"user" validate:"required,numeric"`
@@ -97,6 +100,7 @@ type CreateAnswerRequest struct {
 	Reason string `json:"reason" validate:"required"`
 }
 
+// Create : Create new answer.
 func (ac *AnswerController) Create(c echo.Context) error {
 	if ac == nil {
 		return c.JSON(http.StatusInternalServerError, newResponse(
@@ -133,6 +137,7 @@ func (ac *AnswerController) Create(c echo.Context) error {
 	))
 }
 
+// UpdateAnswerRequest : Request parameters for update answer.
 type UpdateAnswerRequest struct {
 	// UserID : Means external ID.
 	UserID int `json:"user" validate:"required,numeric"`
@@ -150,6 +155,7 @@ type UpdateAnswerRequest struct {
 	Reason string `json:"reason" validate:"required"`
 }
 
+// Update : Update answer.
 func (ac *AnswerController) Update(c echo.Context) error {
 	if ac == nil {
 		return c.JSON(http.StatusInternalServerError, newResponse(
@@ -187,7 +193,7 @@ func (ac *AnswerController) Update(c echo.Context) error {
 
 }
 
-// Delete : Delete a single `Answer` resource.
+// Delete : Delete a single answer.
 func (ac *AnswerController) Delete(c echo.Context) error {
 	if ac == nil {
 		return newErrResponse(c, http.StatusInternalServerError, nil, nil)

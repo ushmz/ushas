@@ -7,8 +7,8 @@ import (
 
 // UserParam : Struct for request of `/signup` endpoint
 type UserParam struct {
-	// Uid : User name/ID for label.
-	Uid string `json:"uid"`
+	// UID : User name/ID for label.
+	UID string `json:"uid"`
 }
 
 // UserSimple : Struct for user information w/o secret.
@@ -32,6 +32,7 @@ type User struct {
 	Secret string `gorm:"unique;not null;column:generated_secret" json:"secret"`
 }
 
+// CreateUser : Create new record into table.
 func CreateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Create(u).Error
@@ -41,6 +42,7 @@ func CreateUser(u *User) error {
 	return nil
 }
 
+// GetUserByID : Gets record from table by ID
 func GetUserByID(id int) (*User, error) {
 	u := new(User)
 	db := database.GetDB()
@@ -51,6 +53,7 @@ func GetUserByID(id int) (*User, error) {
 	return u, nil
 }
 
+// GetUserByUID : Gets a record from table by UID.
 func GetUserByUID(uid string) (*User, error) {
 	u := new(User)
 	db := database.GetDB()
@@ -61,6 +64,7 @@ func GetUserByUID(uid string) (*User, error) {
 	return u, nil
 }
 
+// ListUsers : Gets all records from table.
 func ListUsers() ([]User, error) {
 	us := []User{}
 	db := database.GetDB()
@@ -71,6 +75,7 @@ func ListUsers() ([]User, error) {
 	return us, nil
 }
 
+// UpdateUser : Updates a record with given ID in table.
 func UpdateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Model(&User{}).Updates(u).Error
@@ -84,6 +89,7 @@ func UpdateUser(u *User) error {
 	return nil
 }
 
+// DeleteUser : Delete a record with given ID from table.
 func DeleteUser(id int) error {
 	db := database.GetDB()
 	err := db.Delete(&User{}, id).Error

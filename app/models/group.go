@@ -41,7 +41,7 @@ func GetLeastGroupID() (int, error) {
 				"",
 			)
 		}
-		gc.Count += 1
+		gc.Count++
 		if err := tx.Save(gc).Error; err != nil {
 			return RaiseInternalServerError(
 				err,

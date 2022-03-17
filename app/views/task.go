@@ -2,6 +2,7 @@ package views
 
 import "ushas/models"
 
+// TaskView : Response data of "/task" endpoint.
 type TaskView struct {
 	// ID : The ID of task
 	ID int `json:"id"`
@@ -15,17 +16,18 @@ type TaskView struct {
 	// Description : Description text of task.
 	Description string `json:"description"`
 
-	// SearchUrl : Url used in this task.
-	SearchUrl string `json:"searchUrl"`
+	// SearchURL : Url used in this task.
+	SearchURL string `json:"searchUrl"`
 }
 
+// NewTaskView : Returns single task response data.
 func NewTaskView(t *models.Task) *TaskView {
 	v := &TaskView{
 		ID:          t.ID,
 		Query:       t.Query,
 		Title:       t.Title,
 		Description: t.Description,
-		SearchUrl:   t.SearchUrl,
+		SearchURL:   t.SearchURL,
 	}
 	return v
 }

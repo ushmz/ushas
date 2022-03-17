@@ -6,8 +6,9 @@ import (
 	"ushas/database"
 )
 
+// Answer : Submitted answer for the tasks.
 type Answer struct {
-	// ID : The ID of user.
+	// ID : The ID of answer.
 	ID int `gorm:"unique;not null;column:id" json:"id"`
 
 	// UserID : Means external ID.
@@ -26,6 +27,7 @@ type Answer struct {
 	Reason string `gorm:"not null;column:reason" json:"reason"`
 }
 
+// CreateAnswer : Create new record.
 func CreateAnswer(a *Answer) error {
 	db := database.GetDB()
 	if err := db.Create(a).Error; err != nil {
@@ -34,47 +36,41 @@ func CreateAnswer(a *Answer) error {
 	return nil
 }
 
+// GetAnswerByID : Gets single record from table by ID.
 func GetAnswerByID(id int) (*Answer, error) {
 	a := new(Answer)
 	db := database.GetDB()
-	err := db.Where("id = ?", id).First(a).Error
-	if err != nil {
-		return a, RaiseNotFoundError( err, fmt.Sprintf("Answer for ID %d is not found", id))
+	if err := db.Where("id = ?", id).First(a).Error; err != nil {
+		return a, RaiseNotFoundError(err, fmt.Sprintf("Answer for ID %d is not found", id))
 	}
 	return a, nil
 }
 
+// ListAnswers : Gets all records from table.
 func ListAnswers() ([]Answer, error) {
 	ans := []Answer{}
 	db := database.GetDB()
-	err := db.Find(&ans).Error
-	if err != nil {
+	if err := db.Find(&ans).Error; err != nil {
 		return ans, RaiseInternalServerError(err, "Failed to fetch all User resource")
 	}
 	return ans, nil
 }
 
+// UpdateAnswer : Updates record in table.
 func UpdateAnswer(a *Answer) error {
 	db := database.GetDB()
-	err := db.Save(a).Error
-	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to Update User resource of ID %d", a.ID),
-			a,
-		)
+	// [FIXME] `db.Save()` upserts record.
+	if err := db.Save(a).Error; err != nil {
+		return RaiseInternalServerError(err, fmt.Sprintf("Failed to Update User resource of ID %d", a.ID), a)
 	}
 	return nil
 }
 
+// DeleteAnswer : Deletes a record from table.
 func DeleteAnswer(id int) error {
 	db := database.GetDB()
-	err := db.Delete(&Answer{}, id).Error
-	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to delete User resource of ID %d", id),
-		)
+	if err := db.Delete(&Answer{}, id).Error; err != nil {
+		return RaiseInternalServerError(err, fmt.Sprintf("Failed to delete User resource of ID %d", id))
 	}
 	return nil
 }

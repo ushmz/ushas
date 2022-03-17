@@ -1,7 +1,10 @@
 package server
 
-import "ushas/config"
+import (
+	"ushas/config"
+)
 
+// Init : Gets configurations and runs API server.
 func Init() error {
 	c := config.GetConfig()
 	r, err := NewRouter()
