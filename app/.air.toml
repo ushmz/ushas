@@ -2,6 +2,8 @@ root = "."
 tmp_dir = ".temp"
 
 [build]
+  bin = "./.temp/main"
+  cmd = "go build -o ./.temp/main ./main.go"
   exclude_unchanged = true
 
 [color]
