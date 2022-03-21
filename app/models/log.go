@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 	"ushas/database"
 
@@ -46,10 +47,7 @@ func UpsertSerpDwellTimeLog(l *SerpDwellTimeLog) error {
 		DoUpdates: clause.AssignmentColumns([]string{"time_on_page", "updated_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			"Failed to create new Log resource",
-		)
+		return translateGormError(err, "Failed to create new log", l)
 	}
 	return nil
 }
@@ -59,10 +57,7 @@ func ListSerpDwellTimeLogs() ([]SerpDwellTimeLog, error) {
 	logs := []SerpDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, RaiseInternalServerError(
-			err,
-			"Failed to fetch all Logs",
-		)
+		return logs, translateGormError(err, "Failed to fetch all logs", nil)
 	}
 	return logs, nil
 }
@@ -96,29 +91,51 @@ func (*PageDwellTimeLog) TableName() string {
 	return "logs_page_dwell_time"
 }
 
-// CreatePageViewingLog : Creates new record into table.
-func CreatePageViewingLog(l *PageDwellTimeLog) error {
+// CreatePageDwellTimeLog : Creates new record into table.
+func CreatePageDwellTimeLog(l *PageDwellTimeLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return RaiseInternalServerError(
-			err,
-			"Failed to create new Log resource",
-		)
+		return translateGormError(err, "Failed to create new log", l)
 	}
 	return nil
 }
 
-//ListPageViewingLog : Gets all records from table.
-func ListPageViewingLog() ([]PageDwellTimeLog, error) {
+//ListPageDwellTimeLog : Gets all records from table.
+func ListPageDwellTimeLog() ([]PageDwellTimeLog, error) {
 	logs := []PageDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, RaiseInternalServerError(
-			err,
-			"Failed to fetch all Logs",
-		)
+		return logs, translateGormError(err, "Failed to fetch all logs", nil)
 	}
 	return logs, nil
+}
+
+//SerpEvent : Kinds of events on SERP.
+type SerpEvent string
+
+const (
+	// CLICK : The user click and view page on SERP.
+	CLICK = SerpEvent("click")
+
+	// HOVER : The user put cursor on page link on SERP.
+	HOVER = SerpEvent("hover")
+
+	// PAGINATE : The user go next/previous page on SERP.
+	PAGINATE = SerpEvent("paginate")
+)
+
+// Valid : Check given serp event value is valid or not.
+func (e SerpEvent) Valid() error {
+	switch e {
+	case CLICK:
+		return nil
+	case HOVER:
+		return nil
+	case PAGINATE:
+		return nil
+	default:
+		return errors.New("Invalid value")
+	}
 }
 
 // SerpEventLog : Behavior log such as click event, hover event and paginate event.
@@ -149,7 +166,7 @@ type SerpEventLog struct {
 
 	// Event : It is expected to be "click", "hover" or "paginate"
 	// This field might be better to use Enum.
-	Event string `gorm:"not null;column:event"`
+	Event SerpEvent `gorm:"not null;column:event"`
 
 	// CreatedAt :
 	CreatedAt time.Time `gorm:"not null;not null;column:created_at"`
@@ -164,13 +181,10 @@ func (*SerpEventLog) TableName() string {
 }
 
 // CreateSerpEventLog : Creates new record into table.
-func CreateSerpEventLog(l *PageDwellTimeLog) error {
+func CreateSerpEventLog(l *SerpEventLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return RaiseInternalServerError(
-			err,
-			"Failed to create new Log resource",
-		)
+		return translateGormError(err, "Failed to create new log", l)
 	}
 	return nil
 }
@@ -180,10 +194,7 @@ func ListSerpEventLog() ([]SerpEventLog, error) {
 	logs := []SerpEventLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, RaiseInternalServerError(
-			err,
-			"Failed to fetch all Logs",
-		)
+		return logs, translateGormError(err, "Failed to fetch all logs", nil)
 	}
 	return logs, nil
 }
@@ -213,7 +224,7 @@ func (*SearchSession) TableName() string {
 }
 
 // UpsertSearchSession : Upserts search session log.
-func UpsertSearchSession(l SearchSession) error {
+func UpsertSearchSession(l *SearchSession) error {
 	db := database.GetDB()
 	// If the key ("user_id" and "task_id") is duplicated, update "ended_at" value,
 	// otherwise insert new record.
@@ -224,10 +235,7 @@ func UpsertSearchSession(l SearchSession) error {
 		DoUpdates: clause.AssignmentColumns([]string{"ended_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			"Failed to create new Log resource",
-		)
+		return translateGormError(err, "Failed to create new log", l)
 	}
 	return nil
 }
@@ -237,10 +245,7 @@ func ListSearchSession() ([]SearchSession, error) {
 	logs := []SearchSession{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, RaiseInternalServerError(
-			err,
-			"Failed to fetch all Logs",
-		)
+		return logs, translateGormError(err, "Failed to fetch all logs", nil)
 	}
 	return logs, nil
 }

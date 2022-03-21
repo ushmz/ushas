@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"ushas/database"
 )
 
@@ -14,7 +13,7 @@ type UserParam struct {
 // UserSimple : Struct for user information w/o secret.
 type UserSimple struct {
 	// ID : The ID of user.
-	ID int `gorm:"unique;not null;column:id" json:"id"`
+	ID int `gorm:"primaryKey;column:id" json:"id"`
 
 	// UID : External user_id (like crowdsourcing site).
 	UID string `gorm:"unique;not null;column:uid" json:"uid"`
@@ -23,13 +22,13 @@ type UserSimple struct {
 // User : Struct for user information.
 type User struct {
 	// ID : The ID of user.
-	ID int `gorm:"unique;not null;column:id" json:"id"`
+	ID int `gorm:"primaryKey;column:id" json:"id"`
 
 	// UID : External user_id (like crowdsourcing site).
 	UID string `gorm:"unique;not null;column:uid" json:"uid"`
 
 	// Secret : Generated secret string.
-	Secret string `gorm:"unique;not null;column:generated_secret" json:"secret"`
+	Secret string `gorm:"unique;not null;column:generated_secret" json:"-"`
 }
 
 // CreateUser : Create new record into table.
@@ -37,7 +36,7 @@ func CreateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Create(u).Error
 	if err != nil {
-		return RaiseInternalServerError(err, "Failed to create new `User` resource")
+		return translateGormError(err, "Failed to create new user", u)
 	}
 	return nil
 }
@@ -48,7 +47,7 @@ func GetUserByID(id int) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("id = ?", id).First(u).Error
 	if err != nil {
-		return u, RaiseNotFoundError(err, fmt.Sprintf("User for ID %d is not found", id))
+		return u, translateGormError(err, "Failed to fetch user", id)
 	}
 	return u, nil
 }
@@ -59,7 +58,7 @@ func GetUserByUID(uid string) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("uid = ?", uid).First(u).Error
 	if err != nil {
-		return u, RaiseNotFoundError(err, fmt.Sprintf("User for ID %s is not found", uid))
+		return u, translateGormError(err, "Failed to fetch user", uid)
 	}
 	return u, nil
 }
@@ -70,34 +69,39 @@ func ListUsers() ([]User, error) {
 	db := database.GetDB()
 	err := db.Find(&us).Error
 	if err != nil {
-		return us, RaiseInternalServerError(err, "Failed to fetch all User resource")
+		return us, translateGormError(err, "Failed to fetch all user", nil)
 	}
 	return us, nil
 }
 
 // UpdateUser : Updates a record with given ID in table.
 func UpdateUser(u *User) error {
+	// To throw 404 error when requested user ID not found, we select the row with given ID at first.
+	// If we use `Updates()`, it returns no error even if when given ID not found.
+	// This also catch when the row actually not changed(e.g. same "uid" value requested), so we don't use this.
+	// if rs.RowsAffected <= 0 {
+	// 	return RaiseNotFoundError(rs.Error, fmt.Sprintf("User for ID %d is not found", u.ID))
+	// }
+	user := new(User)
 	db := database.GetDB()
-	err := db.Model(&User{}).Updates(u).Error
-	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to Update User resource of ID %d", u.ID),
-			u,
-		)
+	if err := db.Where("id = ?", u.ID).First(user).Error; err != nil {
+		return translateGormError(err, "Failed to update user", u)
 	}
+
+	user.UID = u.UID
+
+	if err := db.Save(user).Error; err != nil {
+		return translateGormError(err, "Failed to Update user", u)
+	}
+
 	return nil
 }
 
 // DeleteUser : Delete a record with given ID from table.
 func DeleteUser(id int) error {
 	db := database.GetDB()
-	err := db.Delete(&User{}, id).Error
-	if err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to delete User resource of ID %d", id),
-		)
+	if err := db.Delete(&User{}, id).Error; err != nil {
+		return translateGormError(err, "Failed to delete user", id)
 	}
 	return nil
 }

@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-
 	"ushas/database"
 )
 
@@ -31,7 +29,7 @@ type Answer struct {
 func CreateAnswer(a *Answer) error {
 	db := database.GetDB()
 	if err := db.Create(a).Error; err != nil {
-		return RaiseInternalServerError(err, "Failed to create new `Answer` resource")
+		return translateGormError(err, "Failed to create answer", a)
 	}
 	return nil
 }
@@ -41,7 +39,7 @@ func GetAnswerByID(id int) (*Answer, error) {
 	a := new(Answer)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(a).Error; err != nil {
-		return a, RaiseNotFoundError(err, fmt.Sprintf("Answer for ID %d is not found", id))
+		return a, translateGormError(err, "Failed to get answer", id)
 	}
 	return a, nil
 }
@@ -51,7 +49,7 @@ func ListAnswers() ([]Answer, error) {
 	ans := []Answer{}
 	db := database.GetDB()
 	if err := db.Find(&ans).Error; err != nil {
-		return ans, RaiseInternalServerError(err, "Failed to fetch all User resource")
+		return ans, translateGormError(err, "Failed to get all answers", nil)
 	}
 	return ans, nil
 }
@@ -61,7 +59,7 @@ func UpdateAnswer(a *Answer) error {
 	db := database.GetDB()
 	// [FIXME] `db.Save()` upserts record.
 	if err := db.Save(a).Error; err != nil {
-		return RaiseInternalServerError(err, fmt.Sprintf("Failed to Update User resource of ID %d", a.ID), a)
+		return translateGormError(err, "Failed to update answer", a)
 	}
 	return nil
 }
@@ -70,7 +68,7 @@ func UpdateAnswer(a *Answer) error {
 func DeleteAnswer(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Answer{}, id).Error; err != nil {
-		return RaiseInternalServerError(err, fmt.Sprintf("Failed to delete User resource of ID %d", id))
+		return translateGormError(err, "Failed to delete answer", id)
 	}
 	return nil
 }

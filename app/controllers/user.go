@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
 	"ushas/models"
 	"ushas/views"
@@ -35,30 +35,22 @@ type CreateUserRequest struct {
 	UID string `json:"uid" validate:"required"`
 }
 
-// Create : Create new user.
+// Create : Creates new user.
 func (uc *UserController) Create(c echo.Context) error {
 	if uc == nil {
-		return new500Response(c, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
 	p := CreateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			"Failed to parse request body",
-			p,
-		))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
 		if e, ok := err.(*models.APIError); ok {
-			return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
+			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			err.Error(),
-			p,
-		))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
 	}
 
 	u, err := models.GetUserByUID(p.UID)
@@ -67,14 +59,7 @@ func (uc *UserController) Create(c echo.Context) error {
 		s := generateOneTimeSecret(32, 5, 5, 5, 5)
 		model := &models.User{UID: p.UID, Secret: s}
 		if err := models.CreateUser(model); err != nil {
-			if e, ok := err.(*models.APIError); ok {
-				return c.JSON(e.Code, newResponse(e.Code, e.Message, e.Result))
-			}
-			return c.JSON(http.StatusInternalServerError, newResponse(
-				http.StatusInternalServerError,
-				http.StatusText(http.StatusInternalServerError),
-				p,
-			))
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		u = model
 	}
@@ -86,71 +71,88 @@ func (uc *UserController) Create(c echo.Context) error {
 	))
 }
 
-// GetUserByID : Get an user by ID.
-func (uc *UserController) GetUserByID(c echo.Context) error {
+// GetUserByIDRequest : Request parameters for "/user/:id"
+type GetUserByIDRequest struct {
+	ID int `json:"id" param:"id" validate:"required,numeric"`
+}
+
+// GetByID : Gets an user by ID.
+func (uc *UserController) GetByID(c echo.Context) error {
 	if uc == nil {
-		return new500Response(c, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
-	idstr := c.Param("id")
-	id, err := strconv.Atoi(idstr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"User ID must be number",
-		))
+	p := GetUserByIDRequest{}
+	if err := c.Bind(&p); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
 	}
 
-	u, err := models.GetUserByID(id)
-	if err != nil {
-		return newErrResponse(c, http.StatusInternalServerError, err, id)
+	if err := c.Validate(&p); err != nil {
+		if e, ok := err.(*models.APIError); ok {
+			return echo.NewHTTPError(http.StatusBadRequest, e)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
 	}
+
+	u, err := models.GetUserByID(p.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	uv := views.NewUserView(u)
 
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		u,
+		uv,
 	))
 }
 
-// GetUserByUID : Get an user by UID.
-func (uc *UserController) GetUserByUID(c echo.Context) error {
+// GetUserByUIDRequest : Request parameters for "/user/:uid"
+type GetUserByUIDRequest struct {
+	UID string `json:"uid" param:"uid" validate:"required"`
+}
+
+// GetByUID : Gets an user by UID.
+func (uc *UserController) GetByUID(c echo.Context) error {
 	if uc == nil {
-		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
-	uid := c.Param("uid")
-
-	if len(uid) > 0 {
-		return c.JSON(http.StatusBadRequest, newResponse(
-			http.StatusBadRequest,
-			http.StatusText(http.StatusBadRequest),
-			"UID must be string and non-zero value",
-		))
+	p := GetUserByUIDRequest{}
+	if err := c.Bind(&p); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
 	}
 
-	u, err := models.GetUserByUID(uid)
+	if err := c.Validate(&p); err != nil {
+		if e, ok := err.(*models.APIError); ok {
+			return echo.NewHTTPError(http.StatusBadRequest, e)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+	}
+
+	u, err := models.GetUserByUID(p.UID)
 	if err != nil {
-		return newErrResponse(c, http.StatusNotFound, err, uid)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
+	uv := views.NewUserView(u)
 
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		u,
+		uv,
 	))
 }
 
-// List : List all users.
+// List : Lists all users.
 func (uc *UserController) List(c echo.Context) error {
 	if uc == nil {
-		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
 	us, err := models.ListUsers()
 	if err != nil {
-		return newErrResponse(c, http.StatusInternalServerError, err, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	uv := views.NewListUserView(us)
@@ -165,59 +167,75 @@ func (uc *UserController) List(c echo.Context) error {
 // UpdateUserRequest : Struct for request of `user` update endpoint
 type UpdateUserRequest struct {
 	// ID : The ID of user.
-	ID int `json:"id" validate:"required"`
+	ID int `json:"id" param:"id" validate:"required,numeric"`
 
 	// UID : User name/ID for label.
 	UID string `json:"uid" validate:"required"`
 }
 
-// Update : Update user information. This connot update password.
+// Update : Updates user information. This connot update password.
 func (uc *UserController) Update(c echo.Context) error {
 	if uc == nil {
-		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
 	p := UpdateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return newErrResponse(c, http.StatusBadRequest, err, nil)
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
-		return newErrResponse(c, http.StatusBadRequest, err, p)
+		if e, ok := err.(*models.APIError); ok {
+			return echo.NewHTTPError(http.StatusBadRequest, e)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
 	}
 
 	u := &models.User{ID: p.ID, UID: p.UID}
 	if err := models.UpdateUser(u); err != nil {
-		return newErrResponse(c, http.StatusInternalServerError, err, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
+	uv := views.NewUserView(u)
 
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		u,
+		uv,
 	))
 }
 
-// Delete : Delete an user.
+// DeleteUserRequest : Request parameters to delete user.
+type DeleteUserRequest struct {
+	ID int `param:"id" validate:"required,numeric"`
+}
+
+// Delete : Deletes an user.
 func (uc *UserController) Delete(c echo.Context) error {
 	if uc == nil {
-		return newErrResponse(c, http.StatusInternalServerError, nil, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
 	}
 
-	idstr := c.Param("id")
-	id, err := strconv.Atoi(idstr)
-	if err != nil {
-		return newErrResponse(c, http.StatusBadRequest, err, "User ID must be number")
+	p := DeleteTaskRequest{}
+	if err := c.Bind(&p); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
 	}
 
-	if err := models.DeleteUser(id); err != nil {
-		return newErrResponse(c, http.StatusInternalServerError, err, id)
+	if err := c.Validate(&p); err != nil {
+		if e, ok := err.(*models.APIError); ok {
+			return echo.NewHTTPError(http.StatusBadRequest, e)
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+	}
+
+	if err := models.DeleteUser(p.ID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, newResponse(
 		http.StatusOK,
 		http.StatusText(http.StatusOK),
-		id,
+		p.ID,
 	))
 }
 

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"ushas/database"
 )
 
@@ -33,7 +32,7 @@ func CreateLinkedPage(l *LinkedPage) error {
 	db := database.GetDB()
 	err := db.Create(l).Error
 	if err != nil {
-		return RaiseInternalServerError(err, "Failed to create new `LinkedPage` resource")
+		return translateGormError(err, "Failed to create new `LinkedPage` resource", l)
 	}
 	return nil
 }
@@ -43,7 +42,7 @@ func GetLinkedPageByID(id int) (*LinkedPage, error) {
 	l := new(LinkedPage)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(l).Error; err != nil {
-		return l, RaiseNotFoundError(err, fmt.Sprintf("LinkedPage for ID %d is not found", id))
+		return l, translateGormError(err, "Failed to fetch linked page", id)
 	}
 	return l, nil
 }
@@ -53,7 +52,7 @@ func GetLinkedPagesByIDs(ids []int) (*LinkedPage, error) {
 	l := new(LinkedPage)
 	db := database.GetDB()
 	if err := db.Where("id IN ?", ids).Find(l).Error; err != nil {
-		return l, RaiseNotFoundError(err, fmt.Sprintf("LinkedPage for ID %d is not found", ids))
+		return l, translateGormError(err, "Failed to fetch linked page", ids)
 	}
 	return l, nil
 }
@@ -63,7 +62,7 @@ func ListLinkedPage() ([]LinkedPage, error) {
 	lp := []LinkedPage{}
 	db := database.GetDB()
 	if err := db.Find(&lp).Error; err != nil {
-		return lp, RaiseInternalServerError(err, "Failed to fetch all linked page.")
+		return lp, translateGormError(err, "Failed to fetch all linked pages", nil)
 	}
 	return lp, nil
 }
@@ -72,7 +71,7 @@ func ListLinkedPage() ([]LinkedPage, error) {
 func UpdateLinkedPageByID(l *LinkedPage) error {
 	db := database.GetDB()
 	if err := db.Save(l).Error; err != nil {
-		return RaiseInternalServerError(err, fmt.Sprintf("Failed to update LinkedPage resource of ID %d", l.ID), l)
+		return translateGormError(err, "Failed to update linked page", l)
 	}
 	return nil
 }
@@ -81,7 +80,7 @@ func UpdateLinkedPageByID(l *LinkedPage) error {
 func DeleteLinkedPageByID(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&LinkedPage{}, id).Error; err != nil {
-		return RaiseInternalServerError(err, fmt.Sprintf("Failed to delete LinkedPage resource of ID %d", id), id)
+		return translateGormError(err, "Failed to delete LinkedPage resource", id)
 	}
 	return nil
 }

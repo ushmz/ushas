@@ -1,45 +1,49 @@
 package models
 
-import "net/http"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 // APIError : Struct for internal error.
 type APIError struct {
-	Err     error       `json:"-"`
-	Message string      `json:"error"`
-	Code    int         `json:"status"`
-	Result  interface{} `json:"result"`
+	Code   int         `json:"-"`
+	Err    error       `json:"-"`
+	Why    string      `json:"error"`
+	Origin interface{} `json:"result"`
 }
 
 // Error : Returns error message.
 func (e *APIError) Error() string {
-	return e.Message
+	return e.Why
 }
 
-// RaiseNotFoundError : Returns new error of no resource found.
-func RaiseNotFoundError(err error, msg string) error {
+// NewAPIError : Returns new APIError
+func NewAPIError(err error, why string, origin interface{}) *APIError {
 	return &APIError{
-		Err:     err,
-		Message: msg,
-		Code:    http.StatusNotFound,
+		Err:    err,
+		Why:    why,
+		Origin: origin,
 	}
 }
 
-// RaiseBadRequestError : Returns new error that means it failed to parse request body.
-func RaiseBadRequestError(err error, msg string, result ...interface{}) error {
-	return &APIError{
-		Err:     err,
-		Message: msg,
-		Code:    http.StatusBadRequest,
-		Result:  result,
+// translateGormError : Translates gorm error to internal common error.
+// Error message looks good if `why` parameter doesn't contain period. ;)
+func translateGormError(err error, why string, origin interface{}) *APIError {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		e := NewAPIError(err, why+"; Cannot find requested resource.", origin)
+		e.Code = 404
+		return e
 	}
-}
-
-// RaiseInternalServerError : Returns new error of internal server error.
-func RaiseInternalServerError(err error, msg string, result ...interface{}) error {
-	return &APIError{
-		Err:     err,
-		Message: msg,
-		Code:    http.StatusInternalServerError,
-		Result:  result,
+	if errors.Is(err, gorm.ErrInvalidTransaction) {
+		return NewAPIError(err, why+"; Failed to establish transaction.", origin)
 	}
+	if errors.Is(err, gorm.ErrNotImplemented) {
+		return NewAPIError(err, why+"; Method you called is not implemented yet.", origin)
+	}
+	if errors.Is(err, gorm.ErrMissingWhereClause) {
+		return NewAPIError(err, why+"; Filtering parameters are missing.", origin)
+	}
+	return NewAPIError(err, why+"; Unknown error.", origin)
 }

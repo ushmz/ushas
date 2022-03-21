@@ -1,14 +1,13 @@
 package models
 
 import (
-	"fmt"
 	"ushas/database"
 )
 
 // Task : Struct for Task information.
 type Task struct {
 	// ID : The ID of task
-	ID int `gorm:"unique;not null;column:id" json:"id"`
+	ID int `gorm:"primaryKey;not null;column:id" json:"id"`
 
 	// Query : Search query for this task.
 	Query string `gorm:"not null;column:query" json:"query"`
@@ -39,10 +38,7 @@ type TaskInfo struct {
 func CreateTask(t *Task) error {
 	db := database.GetDB()
 	if err := db.Create(t).Error; err != nil {
-		return RaiseInternalServerError(
-			err,
-			"Failed to create new `Task` resource",
-		)
+		return translateGormError(err, "Failed to create new task", t)
 	}
 	return nil
 }
@@ -52,10 +48,7 @@ func GetTaskByID(id int) (*Task, error) {
 	t := new(Task)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(t).Error; err != nil {
-		return t, RaiseNotFoundError(
-			err,
-			fmt.Sprintf("Task for ID %d is not found", id),
-		)
+		return t, translateGormError(err, "Failed to fetch task", id)
 	}
 	return t, nil
 }
@@ -65,23 +58,16 @@ func ListTasks() ([]Task, error) {
 	tasks := []Task{}
 	db := database.GetDB()
 	if err := db.Find(&tasks).Error; err != nil {
-		return tasks, RaiseInternalServerError(
-			err,
-			"Failed to fetch all Task resources",
-		)
+		return tasks, translateGormError(err, "Failed to fetch all tasks", nil)
 	}
 	return tasks, nil
 }
 
-// UpdateTask : Update a record with given ID in table.
+// UpdateTask : Update a record with given parameters.
 func UpdateTask(t *Task) error {
 	db := database.GetDB()
-	if err := db.Save(t).Error; err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to update Task resource of ID %d", t.ID),
-			t,
-		)
+	if err := db.Updates(t).Error; err != nil {
+		return translateGormError(err, "Failed to update task", t)
 	}
 	return nil
 }
@@ -90,10 +76,7 @@ func UpdateTask(t *Task) error {
 func DeleteTask(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Task{}, id).Error; err != nil {
-		return RaiseInternalServerError(
-			err,
-			fmt.Sprintf("Failed to delete Task resource of ID %d", id),
-		)
+		return translateGormError(err, "Failed to delete task", id)
 	}
 	return nil
 }
