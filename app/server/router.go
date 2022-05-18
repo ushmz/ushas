@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"ushas/config"
 	"ushas/controllers"
 	"ushas/models"
@@ -25,7 +26,8 @@ func (v *Validator) Validate(i interface{}) error {
 			msg := fmt.Sprintf("Field `%v` failed on '%s' restriction", e.Field(), e.Tag())
 			results = append(results, msg)
 		}
-		return models.RaiseBadRequestError(err, "Requested body is invalid", results)
+
+		return models.NewAPIError(err, strings.Join(results, ";"), i)
 	}
 	return nil
 }
@@ -46,6 +48,8 @@ func NewRouter() (*echo.Echo, error) {
 		},
 	}))
 
+	e.HTTPErrorHandler = HTTPErrorHandler
+
 	e.Validator = &Validator{validator: validator.New()}
 
 	v := e.Group("/" + c.GetString("server.version"))
@@ -55,32 +59,35 @@ func NewRouter() (*echo.Echo, error) {
 	task := controllers.NewTaskController()
 	user := controllers.NewUserController()
 
-	v.GET("/answer", answer.List)
-	v.GET("/answer/:id", answer.Get)
-	v.POST("/answer", answer.Create)
-	v.PUT("/answer/:id", answer.Update)
-	v.DELETE("/answer/:id", answer.Delete)
+	v.GET("/answers", answer.List)
+	v.GET("/answers/:id", answer.Get)
+	v.POST("/answers", answer.Create)
+	v.PUT("/answers/:id", answer.Update)
+	v.DELETE("/answers/:id", answer.Delete)
 
-	v.GET("/log/dwell", log.Index)
-	v.GET("/log/view", log.Index)
-	v.GET("/log", log.Index)
+	v.GET("/logs/dwell", log.Index)
+	v.GET("/logs/view", log.Index)
+	v.GET("/logs", log.Index)
 	// The usage that getting each log doesn't expected.
 	// v.GET("/log/:id", log.Index)
-	v.POST("/log", log.Index)
-	v.PUT("/log/:id", log.Index)
-	v.DELETE("/log/:id", log.Index)
+	v.POST("/logs/serp/dwell", log.UpsertSerpDwellTimeLog)
+	v.POST("/logs/serp/event", log.CreateSerpEventLog)
+	v.POST("/logs/page/dwell", log.Index)
+	v.PUT("/logs/:id", log.Index)
+	v.DELETE("/logs/:id", log.Index)
 
-	v.GET("/task", task.Index)
-	v.GET("/task/:id", task.Index)
-	v.POST("/task", task.Index)
-	v.PUT("/task/:id", task.Index)
-	v.DELETE("/task", task.Index)
+	v.GET("/tasks", task.List)
+	v.GET("/tasks/:id", task.GetByID)
+	v.POST("/tasks", task.Create)
+	v.PUT("/tasks/:id", task.Update)
+	v.DELETE("/tasks/:id", task.Delete)
 
-	v.GET("/user", user.List)
-	v.GET("/user/:id", user.GetUserByID)
-	v.POST("/user", user.Create)
-	v.PUT("/user/:id", user.Update)
-	v.DELETE("/user", user.Delete)
+	v.GET("/users", user.List)
+	v.GET("/users/:id", user.GetByID)
+	v.GET("/:uid", user.GetByUID)
+	v.POST("/users", user.Create)
+	v.PUT("/users/:id", user.Update)
+	v.DELETE("/users/:id", user.Delete)
 
 	return e, nil
 }

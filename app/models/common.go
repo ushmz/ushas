@@ -3,7 +3,16 @@ package models
 import (
 	"errors"
 
+	"golang.org/x/xerrors"
 	"gorm.io/gorm"
+)
+
+var (
+	// ErrNilReceiver : Throw when the receiver is nil
+	ErrNilReceiver = xerrors.New("Receiver is nil")
+
+	// ErrNoSuchData : Thorw when the requested data not found
+	ErrNoSuchData = xerrors.New("No such data")
 )
 
 // APIError : Struct for internal error.
@@ -29,21 +38,31 @@ func NewAPIError(err error, why string, origin interface{}) *APIError {
 }
 
 // translateGormError : Translates gorm error to internal common error.
-// Error message looks good if `why` parameter doesn't contain period. ;)
-func translateGormError(err error, why string, origin interface{}) *APIError {
+func translateGormError(err error, origin interface{}) *APIError {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		e := NewAPIError(err, why+"; Cannot find requested resource.", origin)
+		msg := "Cannot find requested resource."
+		e := NewAPIError(xerrors.Errorf(msg+": %w", err), msg, origin)
 		e.Code = 404
 		return e
 	}
 	if errors.Is(err, gorm.ErrInvalidTransaction) {
-		return NewAPIError(err, why+"; Failed to establish transaction.", origin)
+		msg := "Failed to establish transaction."
+		e := NewAPIError(xerrors.Errorf(msg+": %w", err), msg, origin)
+		e.Code = 503
+		return e
 	}
 	if errors.Is(err, gorm.ErrNotImplemented) {
-		return NewAPIError(err, why+"; Method you called is not implemented yet.", origin)
+		msg := "Method you called is not implemented yet."
+		e := NewAPIError(xerrors.Errorf(msg+": %w", err), msg, origin)
+		e.Code = 501
+		return e
 	}
 	if errors.Is(err, gorm.ErrMissingWhereClause) {
-		return NewAPIError(err, why+"; Filtering parameters are missing.", origin)
+		msg := "Filtering parameters are missing."
+		e := NewAPIError(xerrors.Errorf(msg+": %w", err), msg, origin)
+		e.Code = 400
+		return e
 	}
-	return NewAPIError(err, why+"; Unknown error.", origin)
+	msg := "Unknown error."
+	return NewAPIError(xerrors.Errorf(msg+": %w", err), msg, origin)
 }

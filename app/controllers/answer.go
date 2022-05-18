@@ -111,7 +111,7 @@ func (ac *AnswerController) Create(c echo.Context) error {
 		// Failed to bind request body
 		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(
 			err,
-			"Failed to bind request body.",
+			"Invalid request body.",
 			p,
 		))
 	}
@@ -175,7 +175,7 @@ func (ac *AnswerController) Update(c echo.Context) error {
 
 	p := UpdateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, models.NewAPIError(err, "Failed to bind requested body", p))
+		return echo.NewHTTPError(http.StatusBadGateway, models.NewAPIError(err, "Invalid requested body", p))
 	}
 
 	if err := c.Validate(&p); err != nil {

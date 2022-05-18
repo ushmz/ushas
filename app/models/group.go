@@ -36,11 +36,11 @@ func GetLeastGroupID() (int, error) {
 	db.Transaction(func(tx *gorm.DB) error {
 		subquery := tx.Table("group_counts").Select("MIN(counts)")
 		if err := tx.Where("count = (?)", subquery).First(gc).Error; err != nil {
-			return translateGormError(err, "Failed to fetch least count", nil)
+			return translateGormError(err, nil)
 		}
 		gc.Count++
 		if err := tx.Save(gc).Error; err != nil {
-			return translateGormError(err, "Failed to update Task count", nil)
+			return translateGormError(err, nil)
 		}
 		return nil
 	})
@@ -53,7 +53,7 @@ func GetAllocationByGroupID(groupID int) (*[]Groups, error) {
 	gs := new([]Groups)
 	db := database.GetDB()
 	if err := db.Where("group_id = ?", groupID).Find(gs).Error; err != nil {
-		return nil, translateGormError(err, "Failed to fetch task and condition group", groupID)
+		return nil, translateGormError(err, groupID)
 	}
 	return gs, nil
 }
@@ -63,7 +63,7 @@ func ListGroups() ([]Groups, error) {
 	groups := []Groups{}
 	db := database.GetDB()
 	if err := db.Find(&groups).Error; err != nil {
-		return groups, translateGormError(err, "Failed to fetch all task and condition groups", nil)
+		return groups, translateGormError(err, nil)
 	}
 	return groups, nil
 }
@@ -72,7 +72,7 @@ func ListGroups() ([]Groups, error) {
 func UpdateGroup(g *Groups) error {
 	db := database.GetDB()
 	if err := db.Save(g).Error; err != nil {
-		return translateGormError(err, "Failed to update task and condition group", g)
+		return translateGormError(err, g)
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func UpdateGroup(g *Groups) error {
 func DeleteGroup(conditionID int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Groups{}, conditionID).Error; err != nil {
-		return translateGormError(err, "Failed to delete task and condition group", conditionID)
+		return translateGormError(err, conditionID)
 	}
 	return nil
 }

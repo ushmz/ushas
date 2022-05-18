@@ -43,7 +43,7 @@ func (uc *UserController) Create(c echo.Context) error {
 
 	p := CreateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
@@ -84,7 +84,7 @@ func (uc *UserController) GetByID(c echo.Context) error {
 
 	p := GetUserByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
@@ -120,7 +120,7 @@ func (uc *UserController) GetByUID(c echo.Context) error {
 
 	p := GetUserByUIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
@@ -181,7 +181,7 @@ func (uc *UserController) Update(c echo.Context) error {
 
 	p := UpdateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
@@ -218,7 +218,7 @@ func (uc *UserController) Delete(c echo.Context) error {
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {

@@ -11,7 +11,7 @@ import (
 // TaskController : Struct for controll `Task` resource.
 type TaskController struct{}
 
-// NewTaskController : Return pointer to `LogController`.
+// NewTaskController : Return pointer to `TaskController`.
 func NewTaskController() *TaskController {
 	return new(TaskController)
 }
@@ -48,7 +48,7 @@ func (tc *TaskController) Create(c echo.Context) error {
 
 	p := CreateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
@@ -97,7 +97,7 @@ func (tc *TaskController) GetByID(c echo.Context) error {
 
 	p := GetByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
@@ -159,7 +159,7 @@ func (tc *TaskController) Update(c echo.Context) error {
 
 	p := UpdateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
@@ -200,7 +200,7 @@ func (tc *TaskController) Delete(c echo.Context) error {
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {

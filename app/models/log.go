@@ -1,10 +1,10 @@
 package models
 
 import (
-	"errors"
 	"time"
 	"ushas/database"
 
+	"golang.org/x/xerrors"
 	"gorm.io/gorm/clause"
 )
 
@@ -47,7 +47,7 @@ func UpsertSerpDwellTimeLog(l *SerpDwellTimeLog) error {
 		DoUpdates: clause.AssignmentColumns([]string{"time_on_page", "updated_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return translateGormError(err, "Failed to create new log", l)
+		return translateGormError(err, l)
 	}
 	return nil
 }
@@ -57,7 +57,7 @@ func ListSerpDwellTimeLogs() ([]SerpDwellTimeLog, error) {
 	logs := []SerpDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, "Failed to fetch all logs", nil)
+		return logs, translateGormError(err, nil)
 	}
 	return logs, nil
 }
@@ -95,7 +95,7 @@ func (*PageDwellTimeLog) TableName() string {
 func CreatePageDwellTimeLog(l *PageDwellTimeLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return translateGormError(err, "Failed to create new log", l)
+		return translateGormError(err, l)
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ func ListPageDwellTimeLog() ([]PageDwellTimeLog, error) {
 	logs := []PageDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, "Failed to fetch all logs", nil)
+		return logs, translateGormError(err, nil)
 	}
 	return logs, nil
 }
@@ -134,7 +134,7 @@ func (e SerpEvent) Valid() error {
 	case PAGINATE:
 		return nil
 	default:
-		return errors.New("Invalid value")
+		return xerrors.New("Invalid SERP event")
 	}
 }
 
@@ -184,7 +184,7 @@ func (*SerpEventLog) TableName() string {
 func CreateSerpEventLog(l *SerpEventLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return translateGormError(err, "Failed to create new log", l)
+		return translateGormError(err, l)
 	}
 	return nil
 }
@@ -194,7 +194,7 @@ func ListSerpEventLog() ([]SerpEventLog, error) {
 	logs := []SerpEventLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, "Failed to fetch all logs", nil)
+		return logs, translateGormError(err, nil)
 	}
 	return logs, nil
 }
@@ -235,7 +235,7 @@ func UpsertSearchSession(l *SearchSession) error {
 		DoUpdates: clause.AssignmentColumns([]string{"ended_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return translateGormError(err, "Failed to create new log", l)
+		return translateGormError(err, l)
 	}
 	return nil
 }
@@ -245,7 +245,7 @@ func ListSearchSession() ([]SearchSession, error) {
 	logs := []SearchSession{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, "Failed to fetch all logs", nil)
+		return logs, translateGormError(err, nil)
 	}
 	return logs, nil
 }

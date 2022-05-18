@@ -36,7 +36,7 @@ func CreateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Create(u).Error
 	if err != nil {
-		return translateGormError(err, "Failed to create new user", u)
+		return translateGormError(err, u)
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func GetUserByID(id int) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("id = ?", id).First(u).Error
 	if err != nil {
-		return u, translateGormError(err, "Failed to fetch user", id)
+		return u, translateGormError(err, id)
 	}
 	return u, nil
 }
@@ -58,7 +58,7 @@ func GetUserByUID(uid string) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("uid = ?", uid).First(u).Error
 	if err != nil {
-		return u, translateGormError(err, "Failed to fetch user", uid)
+		return u, translateGormError(err, uid)
 	}
 	return u, nil
 }
@@ -69,7 +69,7 @@ func ListUsers() ([]User, error) {
 	db := database.GetDB()
 	err := db.Find(&us).Error
 	if err != nil {
-		return us, translateGormError(err, "Failed to fetch all user", nil)
+		return us, translateGormError(err, nil)
 	}
 	return us, nil
 }
@@ -85,13 +85,13 @@ func UpdateUser(u *User) error {
 	user := new(User)
 	db := database.GetDB()
 	if err := db.Where("id = ?", u.ID).First(user).Error; err != nil {
-		return translateGormError(err, "Failed to update user", u)
+		return translateGormError(err, u)
 	}
 
 	user.UID = u.UID
 
 	if err := db.Save(user).Error; err != nil {
-		return translateGormError(err, "Failed to Update user", u)
+		return translateGormError(err, u)
 	}
 
 	return nil
@@ -101,7 +101,7 @@ func UpdateUser(u *User) error {
 func DeleteUser(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&User{}, id).Error; err != nil {
-		return translateGormError(err, "Failed to delete user", id)
+		return translateGormError(err, id)
 	}
 	return nil
 }
