@@ -40,7 +40,7 @@ func (ac *AnswerController) Get(c echo.Context) error {
 	idstr := c.Param("id")
 	id, err := strconv.ParseInt(idstr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
 			err,
 			"Answer ID must be number",
 			idstr,
@@ -109,17 +109,17 @@ func (ac *AnswerController) Create(c echo.Context) error {
 	p := CreateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
 		// Failed to bind request body
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
 			err,
 			"Invalid request body.",
 			p,
 		))
 	}
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
 			err,
 			"Failed to validate.",
 			p,
@@ -175,14 +175,14 @@ func (ac *AnswerController) Update(c echo.Context) error {
 
 	p := UpdateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, models.NewAPIError(err, "Invalid requested body", p))
+		return echo.NewHTTPError(http.StatusBadGateway, models.NewInternalError(err, "Invalid requested body", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	model := &models.Answer{
@@ -207,7 +207,7 @@ func (ac *AnswerController) Update(c echo.Context) error {
 // Delete : Delete a single answer.
 func (ac *AnswerController) Delete(c echo.Context) error {
 	if ac == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.NewAPIError(
+		return echo.NewHTTPError(http.StatusInternalServerError, models.NewInternalError(
 			errors.New("AnswerController is nil"),
 			"Something wrong with server.",
 			nil,
@@ -217,7 +217,7 @@ func (ac *AnswerController) Delete(c echo.Context) error {
 	idstr := c.Param("id")
 	id, err := strconv.Atoi(idstr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
 			err,
 			"Answer ID must be number",
 			idstr,

@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"ushas/api"
 	"ushas/config"
 	"ushas/database"
-	"ushas/server"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 
 	config.Init(*env)
 	database.Init(false)
-	if err := server.Init(); err != nil {
+	if err := api.Init(); err != nil {
 		panic(err)
 	}
 }

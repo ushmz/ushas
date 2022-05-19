@@ -30,14 +30,14 @@ func (sc *SERPController) ListSERP(c echo.Context) error {
 
 	p := ListSERPRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)
@@ -63,14 +63,14 @@ func (sc *SERPController) ListSERPWithIcon(c echo.Context) error {
 
 	p := ListSERPWithIconRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)
@@ -106,14 +106,14 @@ func (sc *SERPController) ListSERPWithRatio(c echo.Context) error {
 
 	p := ListSERPWithRatioRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)

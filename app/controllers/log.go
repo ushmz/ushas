@@ -46,14 +46,14 @@ func (lc *LogController) UpsertSerpDwellTimeLog(c echo.Context) error {
 
 	p := SerpDwellTimeLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	log := &models.SerpDwellTimeLog{
@@ -116,14 +116,14 @@ func (lc *LogController) CreatePageDwellTimeLog(c echo.Context) error {
 
 	p := PageDwellTimeLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	l := &models.PageDwellTimeLog{
@@ -204,14 +204,14 @@ func (lc *LogController) CreateSerpEventLog(c echo.Context) error {
 
 	p := SearchPageEventLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	// if err := models.SerpEvent(p.Event).Valid(); err != nil {
@@ -276,14 +276,14 @@ func (lc *LogController) UpsertSearchSession(c echo.Context) error {
 
 	p := SearchSessionRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	log := &models.SearchSession{

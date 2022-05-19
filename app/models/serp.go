@@ -1,5 +1,11 @@
 package models
 
+import "ushas/database"
+
+var (
+	resultsPerSERP = 10
+)
+
 // SearchPage : Each of search result pages.
 type SearchPage struct {
 	// PageID : ID of search page.
@@ -13,6 +19,22 @@ type SearchPage struct {
 
 	// Snippet : Snippet of each search result page.
 	Snippet string `db:"snippet" json:"snippet"`
+}
+
+// ListSERP :
+func ListSERP(taskID, offset int) ([]SearchPage, error) {
+	pages := []SearchPage{}
+	db := database.GetDB()
+
+	query := db.Where("task_id = ?", taskID).
+		Limit(resultsPerSERP).
+		Offset(offset * resultsPerSERP).
+		Find(&pages)
+
+	if err := query.Error; err != nil {
+		return pages, translateGormError(err, nil)
+	}
+	return pages, nil
 }
 
 // SearchPageWithIcon : The list of this type struct will be returned as a response of `serp` endpoint.

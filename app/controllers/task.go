@@ -48,14 +48,14 @@ func (tc *TaskController) Create(c echo.Context) error {
 
 	p := CreateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	t := &models.Task{
@@ -97,14 +97,14 @@ func (tc *TaskController) GetByID(c echo.Context) error {
 
 	p := GetByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	t, err := models.GetTaskByID(p.ID)
@@ -159,14 +159,14 @@ func (tc *TaskController) Update(c echo.Context) error {
 
 	p := UpdateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	t := &models.Task{
@@ -200,14 +200,14 @@ func (tc *TaskController) Delete(c echo.Context) error {
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	if err := models.DeleteTask(p.ID); err != nil {

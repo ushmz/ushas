@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func (v *Validator) Validate(i interface{}) error {
 			results = append(results, msg)
 		}
 
-		return models.NewAPIError(err, strings.Join(results, ";"), i)
+		return models.NewInternalError(err, strings.Join(results, ";"), i)
 	}
 	return nil
 }

@@ -1,10 +1,19 @@
-package server
+package api
 
 import (
+	"errors"
 	"net/http"
 	"ushas/models"
 
 	"github.com/labstack/echo/v4"
+)
+
+var (
+	// ErrNilReceiver : Throw when the receiver is nil
+	ErrNilReceiver = errors.New("Receiver is nil")
+
+	// ErrNoSuchData : Thorw when the requested data not found
+	ErrNoSuchData = errors.New("No such data")
 )
 
 type errorResponse struct {
@@ -33,7 +42,7 @@ func HTTPErrorHandler(err error, c echo.Context) {
 	switch he.Message.(type) {
 	case error:
 		// If `error` type is returned in controller(handler).
-		if e, ok := he.Message.(*models.APIError); ok {
+		if e, ok := he.Message.(*models.InternalError); ok {
 			if e.Code > 0 {
 				c.JSON(e.Code, newErrResponse(e.Code, e.Why, e.Origin))
 			} else {

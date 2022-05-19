@@ -43,14 +43,14 @@ func (uc *UserController) Create(c echo.Context) error {
 
 	p := CreateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	u, err := models.GetUserByUID(p.UID)
@@ -84,14 +84,14 @@ func (uc *UserController) GetByID(c echo.Context) error {
 
 	p := GetUserByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	u, err := models.GetUserByID(p.ID)
@@ -120,14 +120,14 @@ func (uc *UserController) GetByUID(c echo.Context) error {
 
 	p := GetUserByUIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	u, err := models.GetUserByUID(p.UID)
@@ -181,14 +181,14 @@ func (uc *UserController) Update(c echo.Context) error {
 
 	p := UpdateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	u := &models.User{ID: p.ID, UID: p.UID}
@@ -218,14 +218,14 @@ func (uc *UserController) Delete(c echo.Context) error {
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.APIError); ok {
+		if e, ok := err.(*models.InternalError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewAPIError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
 
 	if err := models.DeleteUser(p.ID); err != nil {
