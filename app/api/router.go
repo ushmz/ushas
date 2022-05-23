@@ -23,13 +23,25 @@ func (v *Validator) Validate(i interface{}) error {
 	if err := v.validator.Struct(i); err != nil {
 		results := []string{}
 		for _, e := range err.(validator.ValidationErrors) {
-			msg := fmt.Sprintf("Field `%v` failed on '%s' restriction", e.Field(), e.Tag())
-			results = append(results, msg)
+			results = append(results, translateValidationError(e))
 		}
 
 		return models.NewInternalError(err, strings.Join(results, ";"), i)
 	}
 	return nil
+}
+
+func translateValidationError(e validator.FieldError) string {
+	f := e.Field()
+	switch e.Tag() {
+	case "required":
+		return fmt.Sprintf("%s is required", f)
+	case "max":
+		return fmt.Sprintf("%s must be lower than %s", f, e.Param())
+	case "min":
+		return fmt.Sprintf("%s must be greater then %s", f, e.Param())
+	}
+	return fmt.Sprintf("%s is not valid %s", e.Field(), e.Value())
 }
 
 // NewRouter : Return pointer to router struct.
