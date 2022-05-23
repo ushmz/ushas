@@ -56,6 +56,7 @@ func NewRouter() (*echo.Echo, error) {
 
 	answer := controllers.NewAnswerController()
 	log := controllers.NewLogController()
+	serp := controllers.NewSERPController()
 	task := controllers.NewTaskController()
 	user := controllers.NewUserController()
 
@@ -75,6 +76,10 @@ func NewRouter() (*echo.Echo, error) {
 	v.POST("/logs/page/dwell", log.Index)
 	v.PUT("/logs/:id", log.Index)
 	v.DELETE("/logs/:id", log.Index)
+
+	v.GET("/serp/:id", serp.ListSERP)
+	v.GET("/serp/icon/:id", serp.ListSERPWithIcon)
+	v.GET("/serp/ratio/:id", serp.ListSERPWithRatio)
 
 	v.GET("/tasks", task.List)
 	v.GET("/tasks/:id", task.GetByID)
