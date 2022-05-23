@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"ushas/models"
+	"ushas/views"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/xerrors"
@@ -19,7 +20,7 @@ func NewSERPController() *SERPController {
 // ListSERPRequest :
 type ListSERPRequest struct {
 	TaskID int `json:"id" param:"id" validate:"required,numeric"`
-	Offset int `json:"offset" query:"offset" validate:"required,numeric"`
+	Offset int `json:"offset" query:"offset" validate:"numeric"`
 }
 
 // ListSERP :
@@ -51,11 +52,11 @@ func (sc *SERPController) ListSERP(c echo.Context) error {
 // ListSERPWithIconRequest :
 type ListSERPWithIconRequest struct {
 	TaskID int `json:"id" param:"id" validate:"required,numeric"`
-	Offset int `json:"offset" query:"offset" validate:"required,numeric"`
+	Offset int `json:"offset" query:"offset" validate:"numeric"`
 	Top    int `json:"top" query:"top" validate:"numeric"`
 }
 
-// ListSERPWithIcon :
+// ListSERPWithIcon : Return search result pages with similarweb icon information
 func (sc *SERPController) ListSERPWithIcon(c echo.Context) error {
 	if sc == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, xerrors.New("SERPController is nil"))
@@ -72,29 +73,38 @@ func (sc *SERPController) ListSERPWithIcon(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
+	if p.Top < 1 {
+		p.Top = 10
+	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	pageIDs := []int{}
+	pageIDs := make([]int, 0, len(pages))
 	for _, v := range pages {
 		pageIDs = append(pageIDs, v.PageID)
 	}
 
-	linkedPages, err := models.GetLinkedPagesByIDs(pageIDs)
+	linkedPages, err := models.GetLinkedPagesByIDs(pageIDs, p.TaskID, p.Top)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return nil
+	sv := views.NewSERPWithIconView(pages, pageIDs, linkedPages)
+
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		sv,
+	))
 }
 
 // ListSERPWithRatioRequest :
 type ListSERPWithRatioRequest struct {
 	TaskID int `json:"id" param:"id" validate:"required,numeric"`
-	Offset int `json:"offset" query:"offset" validate:"required,numeric"`
+	Offset int `json:"offset" query:"offset" validate:"numeric,min=0,max=10"`
 	Top    int `json:"top" query:"top" validate:"numeric"`
 }
 
@@ -115,6 +125,9 @@ func (sc *SERPController) ListSERPWithRatio(c echo.Context) error {
 		}
 		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
 	}
+	if p.Top < 1 {
+		p.Top = 3
+	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)
 	if err != nil {
@@ -126,10 +139,16 @@ func (sc *SERPController) ListSERPWithRatio(c echo.Context) error {
 		pageIDs = append(pageIDs, v.PageID)
 	}
 
-	linkedPages, err := models.GetLinkedPagesByIDs(pageIDs)
+	linkedPages, err := models.GetLinkedPagesRatioByIDs(pageIDs, p.TaskID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return nil
+	sv := views.NewSERPWithRatioView(pages, pageIDs, linkedPages, p.Top)
+
+	return c.JSON(http.StatusOK, newResponse(
+		http.StatusOK,
+		http.StatusText(http.StatusOK),
+		sv,
+	))
 }

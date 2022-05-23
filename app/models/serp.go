@@ -1,6 +1,8 @@
 package models
 
-import "ushas/database"
+import (
+	"ushas/database"
+)
 
 var (
 	resultsPerSERP = 10
@@ -9,16 +11,16 @@ var (
 // SearchPage : Each of search result pages.
 type SearchPage struct {
 	// PageID : ID of search page.
-	PageID int `db:"id" json:"id"`
+	PageID int `gorm:"primaryKey;not null;column:id" json:"id"`
 
 	// Title : The title of each search result page.
-	Title string `db:"title" json:"title"`
+	Title string `gorm:"not null; column:title" json:"title"`
 
 	// URL : URL of each search result page.
-	URL string `db:"url" json:"url"`
+	URL string `gorm:"not null; column:url" json:"url"`
 
 	// Snippet : Snippet of each search result page.
-	Snippet string `db:"snippet" json:"snippet"`
+	Snippet string `gorm:"not null; column:snippet" json:"snippet"`
 }
 
 // ListSERP :
@@ -70,20 +72,9 @@ type SearchPageWithLinkedPageRow struct {
 // CategoryCount : Distribution information for each categories.
 type CategoryCount struct {
 	// Category : Category name.
-	Category string `json:"category"`
+	Category string `gorm:"column:category" json:"category"`
 	// Count : Total number of pages.
-	Count int `json:"count"`
-}
-
-// SearchPageWithRatio : The list of this type struct will be returned as a response of `serp` endpoint.
-type SearchPageWithRatio struct {
-	SearchPage `gorm:"embedded"`
-
-	// Total : Total number of linked pages.
-	Total int `db:"total" json:"total"`
-
-	// Distribution : Distribution information for each categories.
-	Distribution []CategoryCount `db:"distribution" json:"distribution"`
+	Count int `gorm:"column:category_count" json:"count"`
 }
 
 // SearchPageWithLinkedPageRatioRow : `SearchPage` with `LinkedPage` query result row struct
