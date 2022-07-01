@@ -3,6 +3,7 @@ tmp_dir = ".temp"
 
 [build]
   bin = "./.temp/main"
+  args_bin = ["-e", "dev"]
   cmd = "go build -o ./.temp/main ./main.go"
   exclude_unchanged = true
 
