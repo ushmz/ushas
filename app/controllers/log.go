@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"ushas/models"
 
@@ -41,19 +40,25 @@ type SerpDwellTimeLogRequest struct {
 // This inplicitly assumed that it will be called only once per second.
 func (lc *LogController) UpsertSerpDwellTimeLog(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := SerpDwellTimeLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed to validate.", p),
+		)
 	}
 
 	log := &models.SerpDwellTimeLog{
@@ -75,7 +80,7 @@ func (lc *LogController) UpsertSerpDwellTimeLog(c echo.Context) error {
 // ListSerpDwellTimeLogs : Returns all logs.
 func (lc *LogController) ListSerpDwellTimeLogs(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	logs, err := models.ListSerpDwellTimeLogs()
@@ -111,19 +116,25 @@ type PageDwellTimeLogRequest struct {
 // CreatePageDwellTimeLog : Create new page dwell time log.
 func (lc *LogController) CreatePageDwellTimeLog(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := PageDwellTimeLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	l := &models.PageDwellTimeLog{
@@ -148,7 +159,7 @@ func (lc *LogController) CreatePageDwellTimeLog(c echo.Context) error {
 // ListPageDwellTimeLog : Return all logs.
 func (lc *LogController) ListPageDwellTimeLog(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	logs, err := models.ListPageDwellTimeLog()
@@ -199,19 +210,25 @@ type SearchPageEventLogRequest struct {
 // CreateSerpEventLog : Create new serp event log.
 func (lc *LogController) CreateSerpEventLog(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := SearchPageEventLogRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	// if err := models.SerpEvent(p.Event).Valid(); err != nil {
@@ -241,7 +258,7 @@ func (lc *LogController) CreateSerpEventLog(c echo.Context) error {
 // ListSerpEventLog : Return all logs.
 func (lc *LogController) ListSerpEventLog(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	logs, err := models.ListSerpEventLog()
@@ -271,19 +288,25 @@ type SearchSessionRequest struct {
 // UpsertSearchSession : Create search session log.
 func (lc *LogController) UpsertSearchSession(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := SearchSessionRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed bind request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	log := &models.SearchSession{
@@ -305,7 +328,7 @@ func (lc *LogController) UpsertSearchSession(c echo.Context) error {
 // ListSearchSession : Return all search session logs.
 func (lc *LogController) ListSearchSession(c echo.Context) error {
 	if lc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("LogController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	logs, err := models.ListSearchSession()

@@ -2,6 +2,8 @@ package models
 
 import (
 	"ushas/database"
+
+	"github.com/pkg/errors"
 )
 
 // Answer : Submitted answer for the tasks.
@@ -29,7 +31,9 @@ type Answer struct {
 func CreateAnswer(a *Answer) error {
 	db := database.GetDB()
 	if err := db.Create(a).Error; err != nil {
-		return translateGormError(err, a)
+		e := translateGormError(err, a)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -39,7 +43,9 @@ func GetAnswerByID(id int) (*Answer, error) {
 	a := new(Answer)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(a).Error; err != nil {
-		return a, translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return a, e
 	}
 	return a, nil
 }
@@ -49,7 +55,9 @@ func ListAnswers() ([]Answer, error) {
 	ans := []Answer{}
 	db := database.GetDB()
 	if err := db.Find(&ans).Error; err != nil {
-		return ans, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return ans, e
 	}
 	return ans, nil
 }
@@ -59,7 +67,9 @@ func UpdateAnswer(a *Answer) error {
 	db := database.GetDB()
 	// [FIXME] `db.Save()` upserts record.
 	if err := db.Save(a).Error; err != nil {
-		return translateGormError(err, a)
+		e := translateGormError(err, a)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -68,7 +78,9 @@ func UpdateAnswer(a *Answer) error {
 func DeleteAnswer(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Answer{}, id).Error; err != nil {
-		return translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }

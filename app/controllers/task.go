@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"ushas/models"
 
@@ -43,19 +42,25 @@ type CreateTaskRequest struct {
 // Create : Create new task.
 func (tc *TaskController) Create(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := CreateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	t := &models.Task{
@@ -78,7 +83,7 @@ func (tc *TaskController) Create(c echo.Context) error {
 // Allocate : Allocates tasks for new user.
 func (tc *TaskController) Allocate(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	return echo.NewHTTPError(http.StatusNotImplemented, http.StatusText(http.StatusNotImplemented))
@@ -92,23 +97,32 @@ type GetByIDRequest struct {
 // GetByID : Get a task by ID.
 func (tc *TaskController) GetByID(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := GetByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	t, err := models.GetTaskByID(p.ID)
 	if err != nil {
+		if e, ok := err.(*models.AppError); ok {
+			return echo.NewHTTPError(http.StatusNotFound, e)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -118,7 +132,7 @@ func (tc *TaskController) GetByID(c echo.Context) error {
 // List : Lists all tasks.
 func (tc *TaskController) List(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	tasks, err := models.ListTasks()
@@ -154,19 +168,25 @@ type UpdateTaskRequest struct {
 // Update : Updates task.
 func (tc *TaskController) Update(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := UpdateTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	t := &models.Task{
@@ -195,19 +215,25 @@ type DeleteTaskRequest struct {
 // Delete : Deletes a single task.
 func (tc *TaskController) Delete(c echo.Context) error {
 	if tc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("TaskController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := models.DeleteTask(p.ID); err != nil {

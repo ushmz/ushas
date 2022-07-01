@@ -3,6 +3,8 @@ package models
 import (
 	"strings"
 	"ushas/database"
+
+	"github.com/pkg/errors"
 )
 
 // LinkedPage : Linked page information with icon URL.
@@ -33,7 +35,9 @@ func CreateLinkedPage(l *LinkedPage) error {
 	db := database.GetDB()
 	err := db.Create(l).Error
 	if err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -43,7 +47,9 @@ func GetLinkedPageByID(id int) (*LinkedPage, error) {
 	l := new(LinkedPage)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(l).Error; err != nil {
-		return l, translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return l, e
 	}
 	return l, nil
 }
@@ -101,14 +107,18 @@ func GetLinkedPagesByIDs(pageIDs []int, taskID, top int) ([]LinkedPageWithPageID
 
 	rs, err := query.Rows()
 	if err != nil {
-		return l, translateGormError(err, pageIDs)
+		e := translateGormError(err, pageIDs)
+		e.Err = errors.WithStack(e.Err)
+		return l, e
 	}
 
 	defer rs.Close()
 	for rs.Next() {
 		lp := LinkedPageWithPageID{}
 		if err := db.ScanRows(rs, &lp); err != nil {
-			return l, translateGormError(err, pageIDs)
+			e := translateGormError(err, pageIDs)
+			e.Err = errors.WithStack(e.Err)
+			return l, e
 		}
 		l = append(l, lp)
 	}
@@ -182,14 +192,18 @@ func GetLinkedPagesRatioByIDs(pageIDs []int, taskID int) ([]CategoryCountWithPag
 
 	rs, err := query.Rows()
 	if err != nil {
-		return l, translateGormError(err, pageIDs)
+		e := translateGormError(err, pageIDs)
+		e.Err = errors.WithStack(e.Err)
+		return l, e
 	}
 
 	defer rs.Close()
 	for rs.Next() {
 		lp := CategoryCountWithPageID{}
 		if err := db.ScanRows(rs, &lp); err != nil {
-			return l, translateGormError(err, pageIDs)
+			e := translateGormError(err, pageIDs)
+			e.Err = errors.WithStack(e.Err)
+			return l, e
 		}
 		l = append(l, lp)
 	}
@@ -202,7 +216,9 @@ func ListLinkedPage() ([]LinkedPage, error) {
 	lp := []LinkedPage{}
 	db := database.GetDB()
 	if err := db.Find(&lp).Error; err != nil {
-		return lp, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return lp, e
 	}
 	return lp, nil
 }
@@ -211,7 +227,9 @@ func ListLinkedPage() ([]LinkedPage, error) {
 func UpdateLinkedPageByID(l *LinkedPage) error {
 	db := database.GetDB()
 	if err := db.Save(l).Error; err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -220,7 +238,9 @@ func UpdateLinkedPageByID(l *LinkedPage) error {
 func DeleteLinkedPageByID(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&LinkedPage{}, id).Error; err != nil {
-		return translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
