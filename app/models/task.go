@@ -2,6 +2,8 @@ package models
 
 import (
 	"ushas/database"
+
+	"github.com/pkg/errors"
 )
 
 // Task : Struct for Task information.
@@ -38,7 +40,9 @@ type TaskInfo struct {
 func CreateTask(t *Task) error {
 	db := database.GetDB()
 	if err := db.Create(t).Error; err != nil {
-		return translateGormError(err, t)
+		e := translateGormError(err, t)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -48,7 +52,9 @@ func GetTaskByID(id int) (*Task, error) {
 	t := new(Task)
 	db := database.GetDB()
 	if err := db.Where("id = ?", id).First(t).Error; err != nil {
-		return t, translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return t, e
 	}
 	return t, nil
 }
@@ -58,7 +64,9 @@ func ListTasks() ([]Task, error) {
 	tasks := []Task{}
 	db := database.GetDB()
 	if err := db.Find(&tasks).Error; err != nil {
-		return tasks, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return tasks, e
 	}
 	return tasks, nil
 }
@@ -67,7 +75,9 @@ func ListTasks() ([]Task, error) {
 func UpdateTask(t *Task) error {
 	db := database.GetDB()
 	if err := db.Updates(t).Error; err != nil {
-		return translateGormError(err, t)
+		e := translateGormError(err, t)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -76,7 +86,9 @@ func UpdateTask(t *Task) error {
 func DeleteTask(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Task{}, id).Error; err != nil {
-		return translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }

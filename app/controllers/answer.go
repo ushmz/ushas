@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"ushas/models"
@@ -21,7 +20,7 @@ func NewAnswerController() *AnswerController {
 // Index : index
 func (ac *AnswerController) Index(c echo.Context) error {
 	if ac == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("AnswerController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	return c.JSON(http.StatusOK, newResponse(
@@ -34,14 +33,15 @@ func (ac *AnswerController) Index(c echo.Context) error {
 // Get : Get single answer by ID.
 func (ac *AnswerController) Get(c echo.Context) error {
 	if ac == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("AnswerController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	idstr := c.Param("id")
 	id, err := strconv.ParseInt(idstr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAppError(
 			err,
+			http.StatusBadRequest,
 			"Answer ID must be number",
 			idstr,
 		))
@@ -62,11 +62,7 @@ func (ac *AnswerController) Get(c echo.Context) error {
 // List : Lists all answers.
 func (ac *AnswerController) List(c echo.Context) error {
 	if ac == nil {
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Controller is nil",
-		))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	ans, err := models.ListAnswers()
@@ -103,24 +99,26 @@ type CreateAnswerRequest struct {
 // Create : Create new answer.
 func (ac *AnswerController) Create(c echo.Context) error {
 	if ac == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("AnswerController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := CreateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
 		// Failed to bind request body
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAppError(
 			err,
+			http.StatusBadRequest,
 			"Invalid request body.",
 			p,
 		))
 	}
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAppError(
 			err,
+			http.StatusBadRequest,
 			"Failed to validate.",
 			p,
 		))
@@ -166,23 +164,25 @@ type UpdateAnswerRequest struct {
 // Update : Update answer.
 func (ac *AnswerController) Update(c echo.Context) error {
 	if ac == nil {
-		return c.JSON(http.StatusInternalServerError, newResponse(
-			http.StatusInternalServerError,
-			http.StatusText(http.StatusInternalServerError),
-			"Controller is nil",
-		))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := UpdateAnswerRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, models.NewInternalError(err, "Invalid requested body", p))
+		return echo.NewHTTPError(
+			http.StatusBadGateway,
+			models.NewAppError(err, http.StatusBadRequest, "Invalid requested body", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Invalid request body.", p),
+		)
 	}
 
 	model := &models.Answer{
@@ -207,18 +207,15 @@ func (ac *AnswerController) Update(c echo.Context) error {
 // Delete : Delete a single answer.
 func (ac *AnswerController) Delete(c echo.Context) error {
 	if ac == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.NewInternalError(
-			errors.New("AnswerController is nil"),
-			"Something wrong with server.",
-			nil,
-		))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	idstr := c.Param("id")
 	id, err := strconv.Atoi(idstr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(
+		return echo.NewHTTPError(http.StatusBadRequest, models.NewAppError(
 			err,
+			http.StatusBadRequest,
 			"Answer ID must be number",
 			idstr,
 		))

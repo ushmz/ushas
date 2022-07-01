@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -38,19 +37,25 @@ type CreateUserRequest struct {
 // Create : Creates new user.
 func (uc *UserController) Create(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := CreateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	u, err := models.GetUserByUID(p.UID)
@@ -79,19 +84,25 @@ type GetUserByIDRequest struct {
 // GetByID : Gets an user by ID.
 func (uc *UserController) GetByID(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := GetUserByIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	u, err := models.GetUserByID(p.ID)
@@ -115,19 +126,25 @@ type GetUserByUIDRequest struct {
 // GetByUID : Gets an user by UID.
 func (uc *UserController) GetByUID(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := GetUserByUIDRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	u, err := models.GetUserByUID(p.UID)
@@ -147,7 +164,7 @@ func (uc *UserController) GetByUID(c echo.Context) error {
 // List : Lists all users.
 func (uc *UserController) List(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	us, err := models.ListUsers()
@@ -176,19 +193,25 @@ type UpdateUserRequest struct {
 // Update : Updates user information. This connot update password.
 func (uc *UserController) Update(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := UpdateUserRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	u := &models.User{ID: p.ID, UID: p.UID}
@@ -213,19 +236,25 @@ type DeleteUserRequest struct {
 // Delete : Deletes an user.
 func (uc *UserController) Delete(c echo.Context) error {
 	if uc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("UserController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := DeleteTaskRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := models.DeleteUser(p.ID); err != nil {

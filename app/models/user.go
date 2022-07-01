@@ -2,6 +2,8 @@ package models
 
 import (
 	"ushas/database"
+
+	"github.com/pkg/errors"
 )
 
 // UserParam : Struct for request of `/signup` endpoint
@@ -36,7 +38,9 @@ func CreateUser(u *User) error {
 	db := database.GetDB()
 	err := db.Create(u).Error
 	if err != nil {
-		return translateGormError(err, u)
+		e := translateGormError(err, u)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -47,7 +51,9 @@ func GetUserByID(id int) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("id = ?", id).First(u).Error
 	if err != nil {
-		return u, translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return u, e
 	}
 	return u, nil
 }
@@ -58,7 +64,9 @@ func GetUserByUID(uid string) (*User, error) {
 	db := database.GetDB()
 	err := db.Where("uid = ?", uid).First(u).Error
 	if err != nil {
-		return u, translateGormError(err, uid)
+		e := translateGormError(err, uid)
+		e.Err = errors.WithStack(e.Err)
+		return u, e
 	}
 	return u, nil
 }
@@ -69,7 +77,9 @@ func ListUsers() ([]User, error) {
 	db := database.GetDB()
 	err := db.Find(&us).Error
 	if err != nil {
-		return us, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return us, e
 	}
 	return us, nil
 }
@@ -85,13 +95,17 @@ func UpdateUser(u *User) error {
 	user := new(User)
 	db := database.GetDB()
 	if err := db.Where("id = ?", u.ID).First(user).Error; err != nil {
-		return translateGormError(err, u)
+		e := translateGormError(err, u)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 
 	user.UID = u.UID
 
 	if err := db.Save(user).Error; err != nil {
-		return translateGormError(err, u)
+		e := translateGormError(err, u)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 
 	return nil
@@ -101,7 +115,9 @@ func UpdateUser(u *User) error {
 func DeleteUser(id int) error {
 	db := database.GetDB()
 	if err := db.Delete(&User{}, id).Error; err != nil {
-		return translateGormError(err, id)
+		e := translateGormError(err, id)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }

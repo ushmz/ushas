@@ -4,7 +4,7 @@ import (
 	"time"
 	"ushas/database"
 
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 	"gorm.io/gorm/clause"
 )
 
@@ -47,7 +47,9 @@ func UpsertSerpDwellTimeLog(l *SerpDwellTimeLog) error {
 		DoUpdates: clause.AssignmentColumns([]string{"time_on_page", "updated_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -57,7 +59,9 @@ func ListSerpDwellTimeLogs() ([]SerpDwellTimeLog, error) {
 	logs := []SerpDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return logs, e
 	}
 	return logs, nil
 }
@@ -95,7 +99,9 @@ func (*PageDwellTimeLog) TableName() string {
 func CreatePageDwellTimeLog(l *PageDwellTimeLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -105,37 +111,11 @@ func ListPageDwellTimeLog() ([]PageDwellTimeLog, error) {
 	logs := []PageDwellTimeLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return logs, e
 	}
 	return logs, nil
-}
-
-//SerpEvent : Kinds of events on SERP.
-type SerpEvent string
-
-const (
-	// CLICK : The user click and view page on SERP.
-	CLICK = SerpEvent("click")
-
-	// HOVER : The user put cursor on page link on SERP.
-	HOVER = SerpEvent("hover")
-
-	// PAGINATE : The user go next/previous page on SERP.
-	PAGINATE = SerpEvent("paginate")
-)
-
-// Valid : Check given serp event value is valid or not.
-func (e SerpEvent) Valid() error {
-	switch e {
-	case CLICK:
-		return nil
-	case HOVER:
-		return nil
-	case PAGINATE:
-		return nil
-	default:
-		return xerrors.New("Invalid SERP event")
-	}
 }
 
 // SerpEventLog : Behavior log such as click event, hover event and paginate event.
@@ -184,7 +164,9 @@ func (*SerpEventLog) TableName() string {
 func CreateSerpEventLog(l *SerpEventLog) error {
 	db := database.GetDB()
 	if err := db.Create(l).Error; err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -194,7 +176,9 @@ func ListSerpEventLog() ([]SerpEventLog, error) {
 	logs := []SerpEventLog{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return logs, e
 	}
 	return logs, nil
 }
@@ -235,7 +219,9 @@ func UpsertSearchSession(l *SearchSession) error {
 		DoUpdates: clause.AssignmentColumns([]string{"ended_at"}),
 	}).Create(l).Error
 	if err != nil {
-		return translateGormError(err, l)
+		e := translateGormError(err, l)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
@@ -245,7 +231,9 @@ func ListSearchSession() ([]SearchSession, error) {
 	logs := []SearchSession{}
 	db := database.GetDB()
 	if err := db.Find(logs).Error; err != nil {
-		return logs, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return logs, e
 	}
 	return logs, nil
 }

@@ -6,7 +6,6 @@ import (
 	"ushas/views"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/xerrors"
 )
 
 // SERPController : Struct for controll `SERP` resource.
@@ -26,19 +25,25 @@ type ListSERPRequest struct {
 // ListSERP :
 func (sc *SERPController) ListSERP(c echo.Context) error {
 	if sc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, xerrors.New("SERPController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := ListSERPRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	pages, err := models.ListSERP(p.TaskID, p.Offset)
@@ -59,19 +64,25 @@ type ListSERPWithIconRequest struct {
 // ListSERPWithIcon : Return search result pages with similarweb icon information
 func (sc *SERPController) ListSERPWithIcon(c echo.Context) error {
 	if sc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, xerrors.New("SERPController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := ListSERPWithIconRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 	if p.Top < 1 {
 		p.Top = 10
@@ -111,19 +122,25 @@ type ListSERPWithRatioRequest struct {
 // ListSERPWithRatio :
 func (sc *SERPController) ListSERPWithRatio(c echo.Context) error {
 	if sc == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, xerrors.New("SERPController is nil"))
+		return echo.NewHTTPError(http.StatusInternalServerError, models.ErrNilReceiver)
 	}
 
 	p := ListSERPWithRatioRequest{}
 	if err := c.Bind(&p); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Invalid request body.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 
 	if err := c.Validate(&p); err != nil {
-		if e, ok := err.(*models.InternalError); ok {
+		if e, ok := err.(*models.AppError); ok {
 			return echo.NewHTTPError(http.StatusBadRequest, e)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, models.NewInternalError(err, "Failed to validate.", p))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			models.NewAppError(err, http.StatusBadRequest, "Failed bind request body.", p),
+		)
 	}
 	if p.Top < 1 {
 		p.Top = 3

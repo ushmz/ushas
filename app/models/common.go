@@ -3,26 +3,46 @@ package models
 import (
 	"errors"
 
-	"golang.org/x/xerrors"
 	"gorm.io/gorm"
 )
 
-// InternalError : Struct for internal error.
-type InternalError struct {
+var (
+	// ErrDBOperationFailed : DB operation failed
+	ErrDBOperationFailed = errors.New("DB operation failed")
+
+	// ErrDBConnectionFailed : DB connection fauled
+	ErrDBConnectionFailed = errors.New("DB connection fauled")
+
+	// ErrNilReceiver : Throw when the receiver is nil
+	ErrNilReceiver = errors.New("Receiver is nil")
+
+	// ErrBadRequest : HTTP request body or argument is invalid
+	ErrBadRequest = errors.New("Invalid request")
+
+	// ErrNoSuchData : Thorw when the requested data not found
+	ErrNoSuchData = errors.New("No such data")
+
+	// ErrInternal : Internal errors that don't have to tell users in detail
+	ErrInternal = errors.New("Internal server error")
+)
+
+// AppError : Struct for internal error.
+type AppError struct {
 	Code   int         `json:"-"`
 	Err    error       `json:"-"`
 	Why    string      `json:"error"`
-	Origin interface{} `json:"result"`
+	Origin interface{} `json:"request"`
 }
 
 // Error : Returns error message.
-func (e *InternalError) Error() string {
+func (e *AppError) Error() string {
 	return e.Why
 }
 
-// NewInternalError : Returns new APIError
-func NewInternalError(err error, why string, origin interface{}) *InternalError {
-	return &InternalError{
+// NewAppError : Returns new APIError
+func NewAppError(err error, code int, why string, origin interface{}) *AppError {
+	return &AppError{
+		Code:   code,
 		Err:    err,
 		Why:    why,
 		Origin: origin,
@@ -30,31 +50,28 @@ func NewInternalError(err error, why string, origin interface{}) *InternalError 
 }
 
 // translateGormError : Translates gorm error to internal common error.
-func translateGormError(err error, origin interface{}) *InternalError {
+func translateGormError(err error, origin interface{}) *AppError {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		msg := "Cannot find requested resource."
-		e := NewInternalError(xerrors.Errorf(msg+": %w", err), msg, origin)
-		e.Code = 404
+		e := NewAppError(ErrNoSuchData, 404, msg, origin)
 		return e
 	}
 	if errors.Is(err, gorm.ErrInvalidTransaction) {
 		msg := "Failed to establish transaction."
-		e := NewInternalError(xerrors.Errorf(msg+": %w", err), msg, origin)
-		e.Code = 503
+		e := NewAppError(ErrInternal, 503, msg, origin)
 		return e
 	}
 	if errors.Is(err, gorm.ErrNotImplemented) {
 		msg := "Method you called is not implemented yet."
-		e := NewInternalError(xerrors.Errorf(msg+": %w", err), msg, origin)
-		e.Code = 501
+		e := NewAppError(ErrInternal, 501, msg, origin)
 		return e
 	}
 	if errors.Is(err, gorm.ErrMissingWhereClause) {
 		msg := "Filtering parameters are missing."
-		e := NewInternalError(xerrors.Errorf(msg+": %w", err), msg, origin)
-		e.Code = 400
+		e := NewAppError(ErrInternal, 400, msg, origin)
 		return e
 	}
-	msg := "Unknown error."
-	return NewInternalError(xerrors.Errorf(msg+": %w", err), msg, origin)
+	msg := "Internal error."
+	e := NewAppError(ErrInternal, 503, msg, origin)
+	return e
 }

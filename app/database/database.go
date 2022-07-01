@@ -2,7 +2,9 @@ package database
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"time"
 	"ushas/config"
 
@@ -11,6 +13,7 @@ import (
 	migrate "github.com/rubenv/sql-migrate"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -19,12 +22,30 @@ var (
 	migrations = &migrate.FileMigrationSource{
 		Dir: "db/migrations",
 	}
+
+	gormLogger logger.Interface
+
+	devLogger  = log.New(os.Stderr, "[gorm] ", log.LstdFlags|log.Lshortfile)
+	prodLogger = log.New(io.Discard, "[gorm] ", log.LstdFlags)
+
+	devConfig = logger.Config{
+		SlowThreshold:             time.Second,
+		LogLevel:                  logger.Error,
+		IgnoreRecordNotFoundError: true,
+		Colorful:                  false,
+	}
+
+	prodConfig = logger.Config{
+		SlowThreshold:             time.Second,
+		LogLevel:                  logger.Silent,
+		IgnoreRecordNotFoundError: true,
+		Colorful:                  false,
+	}
 )
 
 // Init : Initialize gorm connection.
 func Init(isReset bool, models ...interface{}) {
 	c := config.GetConfig()
-	var err error
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True",
 		c.GetString("db.user"),
@@ -33,7 +54,19 @@ func Init(isReset bool, models ...interface{}) {
 		c.GetString("db.port"),
 		c.GetString("db.database"),
 	)
-	d, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if env := c.GetString("env"); env == "dev" {
+		gormLogger = logger.New(devLogger, devConfig)
+	} else {
+		gormLogger = logger.New(prodLogger, prodConfig)
+	}
+
+	// To avoid shadowing (`d`), declare `err` variable with nil value
+	// and do not use `:=` operator
+	var err error
+	d, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: gormLogger,
+	})
 	if err != nil {
 		// Failed to establish gorm session.
 		panic(err)
@@ -60,7 +93,6 @@ func Init(isReset bool, models ...interface{}) {
 	if c.GetString("env") == "prod" {
 		d.AutoMigrate(models...)
 	}
-
 }
 
 // GetDB : Get new gorm connection.

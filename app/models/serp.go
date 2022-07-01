@@ -2,6 +2,8 @@ package models
 
 import (
 	"ushas/database"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -34,7 +36,9 @@ func ListSERP(taskID, offset int) ([]SearchPage, error) {
 		Find(&pages)
 
 	if err := query.Error; err != nil {
-		return pages, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return pages, e
 	}
 	return pages, nil
 }

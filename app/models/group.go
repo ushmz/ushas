@@ -3,6 +3,7 @@ package models
 import (
 	"ushas/database"
 
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -36,11 +37,15 @@ func GetLeastGroupID() (int, error) {
 	db.Transaction(func(tx *gorm.DB) error {
 		subquery := tx.Table("group_counts").Select("MIN(counts)")
 		if err := tx.Where("count = (?)", subquery).First(gc).Error; err != nil {
-			return translateGormError(err, nil)
+			e := translateGormError(err, nil)
+			e.Err = errors.WithStack(e.Err)
+			return e
 		}
 		gc.Count++
 		if err := tx.Save(gc).Error; err != nil {
-			return translateGormError(err, nil)
+			e := translateGormError(err, nil)
+			e.Err = errors.WithStack(e.Err)
+			return e
 		}
 		return nil
 	})
@@ -53,7 +58,9 @@ func GetAllocationByGroupID(groupID int) (*[]Groups, error) {
 	gs := new([]Groups)
 	db := database.GetDB()
 	if err := db.Where("group_id = ?", groupID).Find(gs).Error; err != nil {
-		return nil, translateGormError(err, groupID)
+		e := translateGormError(err, groupID)
+		e.Err = errors.WithStack(e.Err)
+		return nil, e
 	}
 	return gs, nil
 }
@@ -63,7 +70,9 @@ func ListGroups() ([]Groups, error) {
 	groups := []Groups{}
 	db := database.GetDB()
 	if err := db.Find(&groups).Error; err != nil {
-		return groups, translateGormError(err, nil)
+		e := translateGormError(err, nil)
+		e.Err = errors.WithStack(e.Err)
+		return groups, e
 	}
 	return groups, nil
 }
@@ -72,7 +81,10 @@ func ListGroups() ([]Groups, error) {
 func UpdateGroup(g *Groups) error {
 	db := database.GetDB()
 	if err := db.Save(g).Error; err != nil {
-		return translateGormError(err, g)
+		e := translateGormError(err, g)
+		e.Err = errors.WithStack(e.Err)
+		return e
+
 	}
 	return nil
 }
@@ -81,7 +93,9 @@ func UpdateGroup(g *Groups) error {
 func DeleteGroup(conditionID int) error {
 	db := database.GetDB()
 	if err := db.Delete(&Groups{}, conditionID).Error; err != nil {
-		return translateGormError(err, conditionID)
+		e := translateGormError(err, conditionID)
+		e.Err = errors.WithStack(e.Err)
+		return e
 	}
 	return nil
 }
