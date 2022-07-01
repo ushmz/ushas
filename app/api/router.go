@@ -1,52 +1,20 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
+	"os"
 	"ushas/config"
 	"ushas/controllers"
-	"ushas/models"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// Validator : Struct for validation.
-type Validator struct {
-	validator *validator.Validate
-}
-
-// Validate : Validate request body.
-func (v *Validator) Validate(i interface{}) error {
-	if err := v.validator.Struct(i); err != nil {
-		results := []string{}
-		for _, e := range err.(validator.ValidationErrors) {
-			results = append(results, translateValidationError(e))
-		}
-
-		return models.NewInternalError(err, strings.Join(results, ";"), i)
-	}
-	return nil
-}
-
-func translateValidationError(e validator.FieldError) string {
-	f := e.Field()
-	switch e.Tag() {
-	case "required":
-		return fmt.Sprintf("%s is required", f)
-	case "max":
-		return fmt.Sprintf("%s must be lower than %s", f, e.Param())
-	case "min":
-		return fmt.Sprintf("%s must be greater then %s", f, e.Param())
-	}
-	return fmt.Sprintf("%s is not valid %s", e.Field(), e.Value())
-}
-
 // NewRouter : Return pointer to router struct.
 func NewRouter() (*echo.Echo, error) {
 	c := config.GetConfig()
+
 	e := echo.New()
 	e.HideBanner = true
 	e.Use(middleware.Logger())
@@ -60,17 +28,32 @@ func NewRouter() (*echo.Echo, error) {
 		},
 	}))
 
-	e.HTTPErrorHandler = HTTPErrorHandler
+	e.Logger.SetOutput(os.Stderr)
+	if env := c.GetString("env"); env == "dev" {
+		e.Logger.SetHeader("[${level}]${message}")
+		e.Logger.SetOutput(os.Stdout)
+	}
+
+	e.HTTPErrorHandler = httpErrorHandler
 
 	e.Validator = &Validator{validator: validator.New()}
-
-	v := e.Group("/" + c.GetString("server.version"))
 
 	answer := controllers.NewAnswerController()
 	log := controllers.NewLogController()
 	serp := controllers.NewSERPController()
 	task := controllers.NewTaskController()
 	user := controllers.NewUserController()
+
+	api := e.Group("/api")
+	api.POST("/users", user.Create)
+
+	v := api.Group("/" + c.GetString("server.version"))
+
+	v.GET("/users", user.List)
+	v.GET("/users/:id", user.GetByID)
+	v.GET("/:uid", user.GetByUID)
+	v.PUT("/users/:id", user.Update)
+	v.DELETE("/users/:id", user.Delete)
 
 	v.GET("/answers", answer.List)
 	v.GET("/answers/:id", answer.Get)
@@ -98,13 +81,6 @@ func NewRouter() (*echo.Echo, error) {
 	v.POST("/tasks", task.Create)
 	v.PUT("/tasks/:id", task.Update)
 	v.DELETE("/tasks/:id", task.Delete)
-
-	v.GET("/users", user.List)
-	v.GET("/users/:id", user.GetByID)
-	v.GET("/:uid", user.GetByUID)
-	v.POST("/users", user.Create)
-	v.PUT("/users/:id", user.Update)
-	v.DELETE("/users/:id", user.Delete)
 
 	return e, nil
 }
