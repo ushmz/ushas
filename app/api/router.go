@@ -17,7 +17,10 @@ func NewRouter() (*echo.Echo, error) {
 
 	e := echo.New()
 	e.HideBanner = true
-	e.Use(middleware.Logger())
+	// If you would like to print access log by using this backend API,
+	// you can use this logger as middleware.
+	// (It should be printed by web server like nginx.)
+	// e.Use(accessLogger())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: c.GetStringSlice("server.cors"),
 		AllowMethods: []string{
@@ -28,7 +31,7 @@ func NewRouter() (*echo.Echo, error) {
 		},
 	}))
 
-	e.Logger.SetOutput(os.Stderr)
+	// e.Logger.SetOutput(os.Stderr)
 	if env := c.GetString("env"); env == "dev" {
 		e.Logger.SetHeader("[${level}]${message}")
 		e.Logger.SetOutput(os.Stdout)
